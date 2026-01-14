@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "875023986050",
+    "project_id": "lone-wolf-legacy",
+    "storage_bucket": "lone-wolf-legacy.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:875023986050:android:8d5df790c842179120b39b",
+        "android_client_info": {
+          "package_name": "com.zerogravity.lonewolflegacy"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDvNBT5D0Wvx2oulnjvhv-BnenThuoamKQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
