@@ -86,7 +86,7 @@ Clone the Repository:
 
 Bash
 
-git clone [https://github.com/yourusername/your-fps-project.git](https://github.com/yourusername/your-fps-project.git)
+git clone https://github.com/vishnubabu08/Lone-Wolf-Legacy-Multiplayer
 Open in Unity:
 
 Developed with Unity 2021.3.x (LTS recommended).
