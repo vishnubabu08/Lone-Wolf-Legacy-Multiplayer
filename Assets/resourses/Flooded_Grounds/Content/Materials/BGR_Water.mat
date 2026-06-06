@@ -12,6 +12,7 @@ Material:
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords:
+  - _ADD_PRECOMPUTED_VELOCITY
   - _CLEARCOAT
   - _EMISSION
   - _METALLICSPECGLOSSMAP
@@ -208,6 +209,7 @@ Material:
     - _WavePower: 1.4029856
     - _WaveScale: 0.058
     - _WorkflowMode: 1
+    - _XRMotionVectorsPass: 1
     - _ZWrite: 1
     - _fogEnd: 400
     - _fogStart: 20

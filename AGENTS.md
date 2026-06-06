@@ -1,6 +1,6 @@
 <!-- UNITY CODE ASSIST INSTRUCTIONS START -->
-- Project name: MobileMultiPlayer
-- Unity version: Unity 6000.0.58f2
+- Project name: MultiPlayer
+- Unity version: Unity 6000.3.16f1
 - Active game object:
   - Name: SCAR_L
   - Tag: Untagged

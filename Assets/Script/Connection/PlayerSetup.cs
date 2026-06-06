@@ -65,10 +65,16 @@ public class PlayerSetup : MonoBehaviourPun
     [PunRPC]
     public void SyncCostume(int headID, int helmetID, int vestID)
     {
-        // Activate the correct models based on the numbers received from the network
         ActivateModel(heads, headID);
         ActivateModel(helmets, helmetID);
         ActivateModel(vests, vestID);
+
+        // Tell ArmorSystem which helmet/vest index is now active
+        ArmorSystem armor = GetComponent<ArmorSystem>();
+        if (armor != null)
+        {
+            armor.SetActiveArmor(helmetID, vestID);
+        }
     }
 
     // Helper function to turn on 1 item and turn off the rest

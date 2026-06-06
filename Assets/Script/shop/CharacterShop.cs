@@ -206,7 +206,6 @@ public class CharacterShop : MonoBehaviour
         else { btnTxt.text = "BUY " + list[index].price; btn.interactable = true; }
     }
 }
-
 [System.Serializable]
 public class ItemBlueprint
 {
@@ -215,4 +214,7 @@ public class ItemBlueprint
     public GameObject model;
     public Sprite itemSprite;
     public bool isOwned;
+
+    [Header("Armor Stats (Helmets & Vests only)")]
+    public int armorHP = 50; // Set this per item in Inspector
 }

@@ -4,7 +4,6 @@ using Photon.Pun.UtilityScripts;
 using UnityEngine.UI;
 using System.Collections;
 
-// 1. Add IPunObservable to Sync Health continuously
 public class Health : MonoBehaviourPun, IPunObservable
 {
     public int health = 100;
@@ -12,10 +11,16 @@ public class Health : MonoBehaviourPun, IPunObservable
 
     [Header("Regeneration")]
     public bool enableRegen = true;
-    public float regenWaitTime = 5.0f; // Wait 5s before healing
-    public float regenSpeed = 10.0f;   // Heal 10 HP per second
+    public float regenWaitTime = 5.0f;
+
+    [Header("Two-Phase Regen Speeds")]
+    public float slowRegenSpeed = 3f;
+    public float fastRegenSpeed = 15f;
+
     private float lastDamageTime;
-    private float healthFloat; // Float for smooth calculation
+    private float healthFloat;
+    private float regenStartHealth = -1f;
+    private bool regenStarted = false;
 
     [Header("UI")]
     public Slider healthSlider;
@@ -24,6 +29,20 @@ public class Health : MonoBehaviourPun, IPunObservable
     public Animator animator;
     public MonoBehaviour[] scriptsToDisable;
 
+    [Header("Low Health Effects")]
+    public AudioSource heartbeatAudioSource;
+    public AudioClip heartbeatClip;
+    public Image vignetteImage;
+
+    [Header("Low Health Thresholds")]
+    public int lowHealthThreshold = 25;
+    public float vignetteMaxAlpha = 0.6f;
+    public float vignettePulseSpeed = 2f;
+    public float heartbeatFadeSpeed = 3f;
+
+    private bool isLowHealth = false;
+    private float vignetteTimer = 0f;
+
     private bool isDead = false;
 
     private void Awake()
@@ -31,53 +50,143 @@ public class Health : MonoBehaviourPun, IPunObservable
         health = 100;
         healthFloat = 100f;
         isDead = false;
+
+        if (vignetteImage != null)
+        {
+            Color c = vignetteImage.color;
+            c.a = 0f;
+            vignetteImage.color = c;
+        }
+
+        if (heartbeatAudioSource != null)
+        {
+            heartbeatAudioSource.loop = true;
+            heartbeatAudioSource.volume = 0f;
+            heartbeatAudioSource.clip = heartbeatClip;
+        }
     }
 
     private void Update()
     {
-        // UI Update (Run on everyone's screen)
         if (healthSlider != null)
-        {
             healthSlider.value = health;
+
+        if (IsLocalPlayer && photonView.IsMine)
+        {
+            HandleLowHealthEffects();
         }
 
-        // --- REGENERATION LOGIC ---
-        // Only the Owner (Local Player) or Master Client (for Bots) runs the math.
-        // Everyone else just receives the result via OnPhotonSerializeView.
-        bool canRegen = (IsLocalPlayer && photonView.IsMine) || (GetComponent<BotController>() && PhotonNetwork.IsMasterClient);
+        bool canRegen = (IsLocalPlayer && photonView.IsMine) ||
+                        (GetComponent<BotController>() && PhotonNetwork.IsMasterClient);
 
         if (canRegen && enableRegen && !isDead)
         {
-            // If hurt AND enough time passed since last hit
             if (health < 100 && Time.time > lastDamageTime + regenWaitTime)
             {
-                // Smoothly add health
-                healthFloat += regenSpeed * Time.deltaTime;
+                if (!regenStarted)
+                {
+                    regenStartHealth = healthFloat;
+                    regenStarted = true;
+                }
+
+                float missingHealth = 100f - regenStartHealth;
+                float slowPhaseEnd = regenStartHealth + (missingHealth * 0.25f);
+                float currentSpeed = (healthFloat < slowPhaseEnd) ? slowRegenSpeed : fastRegenSpeed;
+
+                healthFloat += currentSpeed * Time.deltaTime;
                 health = Mathf.FloorToInt(healthFloat);
 
-                // Cap at 100
-                if (health > 100)
+                if (health >= 100)
                 {
                     health = 100;
                     healthFloat = 100f;
+                    regenStarted = false;
                 }
+            }
+            else if (health >= 100)
+            {
+                regenStarted = false;
+            }
+            else
+            {
+                regenStarted = false;
             }
         }
     }
 
-    // --- SYNC HEALTH (Critical for Regen) ---
-    public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+    private void HandleLowHealthEffects()
     {
-        if (stream.IsWriting)
+        bool shouldBeActive = (health > 0 && health <= lowHealthThreshold);
+
+        if (shouldBeActive)
         {
-            // Owner sends current health
-            stream.SendNext(health);
+            isLowHealth = true;
+
+            if (heartbeatAudioSource != null && heartbeatClip != null)
+            {
+                if (!heartbeatAudioSource.isPlaying)
+                    heartbeatAudioSource.Play();
+
+                float targetVolume = Mathf.Lerp(1f, 0.3f, (float)health / lowHealthThreshold);
+                heartbeatAudioSource.volume = Mathf.MoveTowards(
+                    heartbeatAudioSource.volume,
+                    targetVolume,
+                    Time.deltaTime * heartbeatFadeSpeed
+                );
+
+                heartbeatAudioSource.pitch = Mathf.Lerp(1.6f, 0.9f, (float)health / lowHealthThreshold);
+            }
+
+            if (vignetteImage != null)
+            {
+                vignetteTimer += Time.deltaTime * vignettePulseSpeed;
+                float pulse = Mathf.PingPong(vignetteTimer, 1f);
+
+                float healthPercent = (float)health / lowHealthThreshold;
+                float minAlpha = Mathf.Lerp(vignetteMaxAlpha * 0.6f, 0.1f, healthPercent);
+                float maxAlpha = Mathf.Lerp(vignetteMaxAlpha, vignetteMaxAlpha * 0.3f, healthPercent);
+                float targetAlpha = Mathf.Lerp(minAlpha, maxAlpha, pulse);
+
+                Color c = vignetteImage.color;
+                c.a = targetAlpha;
+                vignetteImage.color = c;
+            }
         }
         else
         {
-            // Others receive it
+            isLowHealth = false;
+
+            if (heartbeatAudioSource != null)
+            {
+                heartbeatAudioSource.volume = Mathf.MoveTowards(
+                    heartbeatAudioSource.volume,
+                    0f,
+                    Time.deltaTime * heartbeatFadeSpeed
+                );
+
+                if (heartbeatAudioSource.volume <= 0f && heartbeatAudioSource.isPlaying)
+                    heartbeatAudioSource.Stop();
+            }
+
+            if (vignetteImage != null)
+            {
+                Color c = vignetteImage.color;
+                c.a = Mathf.MoveTowards(c.a, 0f, Time.deltaTime * 2f);
+                vignetteImage.color = c;
+
+                if (c.a <= 0f) vignetteTimer = 0f;
+            }
+        }
+    }
+
+    public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+    {
+        if (stream.IsWriting)
+            stream.SendNext(health);
+        else
+        {
             health = (int)stream.ReceiveNext();
-            healthFloat = health; // Sync float too so it doesn't glitch
+            healthFloat = health;
         }
     }
 
@@ -86,12 +195,13 @@ public class Health : MonoBehaviourPun, IPunObservable
     {
         if (isDead) return;
 
-        health -= _damage;
-        healthFloat = health; // Sync the float logic
+        ArmorSystem armor = GetComponent<ArmorSystem>();
+        int actualDamage = (armor != null) ? armor.AbsorbDamage(_damage) : _damage;
 
-        // --- RESET REGEN TIMER ---
+        health -= actualDamage;
+        healthFloat = health;
         lastDamageTime = Time.time;
-        // -------------------------
+        regenStarted = false;
 
         if (healthSlider != null) healthSlider.value = health;
 
@@ -99,21 +209,20 @@ public class Health : MonoBehaviourPun, IPunObservable
         {
             isDead = true;
 
-            // --- AWARD KILL TO ATTACKER ---
+            if (heartbeatAudioSource != null) { heartbeatAudioSource.Stop(); heartbeatAudioSource.volume = 0f; }
+            if (vignetteImage != null) { Color c = vignetteImage.color; c.a = 0f; vignetteImage.color = c; }
+
             PhotonView attacker = PhotonView.Find(attackerViewID);
             if (attacker != null)
             {
-                // Attacker is Bot
                 if (attacker.TryGetComponent(out BotController bot))
                 {
                     if (PhotonNetwork.IsMasterClient) bot.GiveKill(100);
                 }
-                // Attacker is Human
                 else if (attacker.Owner != null)
                 {
                     Photon.Realtime.Player player = attacker.Owner;
                     player.AddScore(100);
-
                     if (PhotonNetwork.IsMasterClient)
                     {
                         var props = player.CustomProperties;
@@ -124,8 +233,16 @@ public class Health : MonoBehaviourPun, IPunObservable
                 }
             }
 
-            // --- DEATH LOGIC ---
-            if (GetComponent<BotController>() != null) return;
+            // =============================================
+            // BOT DEATH — spawn ammo drop then return
+            // =============================================
+            if (GetComponent<BotController>() != null)
+            {
+                AmmoDropSpawner dropSpawner = GetComponent<AmmoDropSpawner>();
+                if (dropSpawner != null) dropSpawner.SpawnAmmoDrop();
+                return;
+            }
+            // =============================================
 
             photonView.RPC("RPC_RealPlayerDeath", RpcTarget.All);
             if (photonView.IsMine) StartCoroutine(PlayerDeathRoutine());
@@ -137,8 +254,10 @@ public class Health : MonoBehaviourPun, IPunObservable
     {
         if (animator != null) animator.SetTrigger("Die");
         foreach (var script in scriptsToDisable) if (script != null) script.enabled = false;
+
         Collider col = GetComponent<Collider>();
         if (col != null) col.enabled = false;
+
         Rigidbody rb = GetComponent<Rigidbody>();
         if (rb != null) { rb.isKinematic = true; rb.useGravity = false; rb.linearVelocity = Vector3.zero; }
 
@@ -146,9 +265,17 @@ public class Health : MonoBehaviourPun, IPunObservable
         if (cc != null) cc.enabled = false;
     }
 
+    // =============================================
+    // PLAYER DEATH — spawn ammo drop then respawn
+    // =============================================
     IEnumerator PlayerDeathRoutine()
     {
+        // Spawn ammo drop immediately at death position
+        AmmoDropSpawner dropSpawner = GetComponent<AmmoDropSpawner>();
+        if (dropSpawner != null) dropSpawner.SpawnAmmoDrop();
+
         yield return new WaitForSeconds(3.0f);
+
         if (RoomManager.instance != null)
         {
             var props = PhotonNetwork.LocalPlayer.CustomProperties;
@@ -160,4 +287,5 @@ public class Health : MonoBehaviourPun, IPunObservable
         }
         PhotonNetwork.Destroy(gameObject);
     }
+    // =============================================
 }

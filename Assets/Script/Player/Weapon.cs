@@ -20,18 +20,21 @@ public class Weapon : MonoBehaviour
     public LayerMask hitLayers;
 
     [Header("Ammo")]
-    public int mag = 5;
-    public int ammo = 30;
-    public int magAmmo = 30;
+    public int mag = 5;          // Spare magazines
+    public int maxMags = 10;     // Max spare magazines cap
+    public int ammo = 30;        // Bullets in current magazine
+    public int magAmmo = 30;     // Max bullets per magazine
 
     [Header("Refs")]
     public Camera camera;
     public Animator animator;
     public InputManager inputManager;
     public ParticleSystem muzzleFlash;
+    public Light muzzleLight;
     public GameObject hitVFX;
-    public TextMeshProUGUI magText;
-    public TextMeshProUGUI ammoText;
+    public GameObject surfaceHitVFX;
+    public TextMeshProUGUI magText;       // Shows spare mag COUNT (5, 4, 3...)
+    public TextMeshProUGUI ammoText;      // Shows bullets in gun (30/30, 15/30...)
     public AudioSource soundAudioSource;
     public AudioClip shootingSoundClip;
     public AudioClip reloadingSoundClip;
@@ -44,8 +47,18 @@ public class Weapon : MonoBehaviour
 
     private void Start()
     {
+        // Make sure ammo starts correct
+        ammo = magAmmo;
         UpdateAmmoUI();
         cameraManager = FindObjectOfType<CameraManager>();
+    }
+
+    private void OnEnable()
+    {
+        // Reset reload state when weapon is switched back
+        isReloading = false;
+        isScoped = false;
+        UpdateAmmoUI();
     }
 
     private void OnDisable()
@@ -60,13 +73,20 @@ public class Weapon : MonoBehaviour
 
         if (nextFire > 0) nextFire -= Time.deltaTime;
 
-        // Reload
-        if (inputManager.reloadInput && !isReloading)
+        // AUTO RELOAD when ammo hits 0 and spare mags available
+        if (ammo <= 0 && !isReloading && mag > 0)
         {
-            if (ammo < magAmmo && mag > 0) StartCoroutine(Reload());
+            StartCoroutine(Reload());
         }
 
-        // Fire
+        // Manual reload
+        if (inputManager.reloadInput && !isReloading)
+        {
+            if (ammo < magAmmo && mag > 0)
+                StartCoroutine(Reload());
+        }
+
+        // Fire — only when ammo > 0 and NOT reloading
         if (ammo > 0 && !isReloading)
         {
             if (isAutomatic)
@@ -74,7 +94,7 @@ public class Weapon : MonoBehaviour
                 if (inputManager.shootInput && nextFire <= 0)
                 {
                     Fire();
-                    nextFire = 1 / fireRate;
+                    nextFire = 1f / fireRate;
                 }
             }
             else
@@ -82,7 +102,7 @@ public class Weapon : MonoBehaviour
                 if (inputManager.shootInput && triggerReleased && nextFire <= 0)
                 {
                     Fire();
-                    nextFire = 1 / fireRate;
+                    nextFire = 1f / fireRate;
                     triggerReleased = false;
                 }
                 if (!inputManager.shootInput) triggerReleased = true;
@@ -95,13 +115,18 @@ public class Weapon : MonoBehaviour
     IEnumerator Reload()
     {
         isReloading = true;
-        animator.SetTrigger("Reload");
+        if (animator) animator.SetTrigger("Reload");
         if (soundAudioSource) soundAudioSource.PlayOneShot(reloadingSoundClip);
 
         yield return new WaitForSeconds(reloadTime);
 
-        mag--;
-        ammo = magAmmo;
+        // Safety check — mag might have changed during reload wait
+        if (mag > 0)
+        {
+            mag--;
+            ammo = magAmmo;
+        }
+
         UpdateAmmoUI();
         isReloading = false;
     }
@@ -110,9 +135,11 @@ public class Weapon : MonoBehaviour
     {
         ammo--;
         UpdateAmmoUI();
-        if (muzzleFlash != null) muzzleFlash.Play();
-        if (soundAudioSource != null && shootingSoundClip != null) soundAudioSource.PlayOneShot(shootingSoundClip);
 
+        if (muzzleFlash != null) muzzleFlash.Play();
+        if (soundAudioSource != null && shootingSoundClip != null)
+            soundAudioSource.PlayOneShot(shootingSoundClip);
+        if (muzzleLight != null) StartCoroutine(FlashMuzzleLight());
         if (cameraManager != null) cameraManager.ApplyRecoil(recoilForce);
 
         Vector3 shootDirection = camera.transform.forward;
@@ -123,51 +150,63 @@ public class Weapon : MonoBehaviour
         Ray ray = new Ray(camera.transform.position, shootDirection);
         RaycastHit hit;
 
-        // Check if we hit anything within range
         if (Physics.Raycast(ray.origin, ray.direction, out hit, 280f, hitLayers))
         {
             Debug.Log("Hit: " + hit.transform.name);
 
-            if (hitVFX != null)
-            {
-                PhotonNetwork.Instantiate(hitVFX.name, hit.point, Quaternion.identity);
-            }
+            bool hitCharacter = hit.transform.TryGetComponent(out Health health);
 
-            // --- THE FIX: CRASH PREVENTION LOGIC ---
-            // 1. Check if the object we hit has a Health Script
-            if (hit.transform.TryGetComponent(out Health health))
+            if (hitCharacter)
             {
-                // 2. Find the Target's PhotonView
+                if (hitVFX != null)
+                    PhotonNetwork.Instantiate(hitVFX.name, hit.point, Quaternion.identity);
+
                 PhotonView targetPV = hit.transform.GetComponent<PhotonView>();
-
-                // 3. Find MY PhotonView (Look in Parent because Weapon is a child object)
                 PhotonView myPV = GetComponent<PhotonView>();
                 if (myPV == null) myPV = GetComponentInParent<PhotonView>();
 
-                // 4. If both exist, send the RPC safely
                 if (targetPV != null && myPV != null)
                 {
-                    // Add local score immediately for feedback
                     PhotonNetwork.LocalPlayer.AddScore(damage);
-
-                    // Send damage + My ID so I get the Kill/Score later
                     targetPV.RPC("TakeDamage", RpcTarget.All, damage, myPV.ViewID);
                 }
-                else
+            }
+            else
+            {
+                if (surfaceHitVFX != null)
                 {
-                    Debug.LogWarning("Could not find PhotonView on Target or Shooter!");
+                    Quaternion hitRotation = Quaternion.LookRotation(hit.normal);
+                    PhotonNetwork.Instantiate(surfaceHitVFX.name, hit.point, hitRotation);
                 }
             }
         }
     }
 
-    public void AddMagFromPickup() { mag++; UpdateAmmoUI(); }
+    IEnumerator FlashMuzzleLight()
+    {
+        muzzleLight.enabled = true;
+        yield return new WaitForSeconds(0.05f);
+        muzzleLight.enabled = false;
+    }
+
+    // =============================================
+    // UI — called from here AND from AmmoDrop
+    // =============================================
     public void UpdateAmmoUI()
     {
-        if (magText != null && ammoText != null)
+        if (magText != null)
+            magText.text = mag.ToString();          // Just the number: 5, 4, 3...
+
+        if (ammoText != null)
+            ammoText.text = ammo + "/" + magAmmo;   // Bullets: 30/30, 15/30...
+    }
+
+    public void AddMagFromPickup()
+    {
+        if (mag < maxMags)
         {
-            magText.text = mag.ToString();
-            ammoText.text = ammo + "/" + magAmmo;
+            mag++;
+            UpdateAmmoUI();
         }
     }
 }

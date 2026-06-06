@@ -49,6 +49,8 @@ MonoBehaviour:
   - RPC_BotDeath
   - RPC_RealPlayerDeath
   - RPC_LoadOldStats
+  - RPC_BreakArmor
+  - RPC_ResetArmorVisuals
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1
