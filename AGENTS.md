@@ -2,7 +2,7 @@
 - Project name: MultiPlayer
 - Unity version: Unity 6000.3.16f1
 - Active game object:
-  - Name: SCAR_L
+  - Name: StatusText
   - Tag: Untagged
-  - Layer: Default
+  - Layer: UI
 <!-- UNITY CODE ASSIST INSTRUCTIONS END -->

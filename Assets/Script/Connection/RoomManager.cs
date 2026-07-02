@@ -6,16 +6,13 @@ using UnityEngine.UI;
 using Hashtable = ExitGames.Client.Photon.Hashtable;
 using System.Collections;
 using UnityEngine.SceneManagement;
-using System.Linq; // <--- REQUIRED FOR LEADERBOARD SORTING
+using System.Linq;
 
 public class RoomManager : MonoBehaviourPunCallbacks
 {
     public static RoomManager instance;
 
-    // --- ADDED: TRAFFIC LIGHT VARIABLE ---
-    // This controls when bots are allowed to spawn and attack
     public static bool gameIsLive = false;
-    // -------------------------------------
 
     public enum GameMode { Global, Custom }
     [Header("Game Mode")]
@@ -23,8 +20,8 @@ public class RoomManager : MonoBehaviourPunCallbacks
 
     [Header("Player & Spawn")]
     public GameObject player;
-    public Transform[] spawnPoints;   // Map1
-    public Transform[] spawnPoints1;  // Map2
+    public Transform[] spawnPoints;
+    public Transform[] spawnPoints1;
 
     [Header("UI References")]
     public GameObject roomCam;
@@ -38,17 +35,21 @@ public class RoomManager : MonoBehaviourPunCallbacks
     public TextMeshProUGUI matchTimerText;
 
     [Header("Game Over / Leaderboard UI")]
-    public GameObject gameOverPanel;        // Drag your "GameOverPanel" here
-    public Transform top3Container;         // Drag the "Vertical Layout Group" here
-    public GameObject playerRowPrefab;      // Drag your Text Prefab here
-    public TextMeshProUGUI winnerText;      // Drag the Big "Winner Name" Text here
-    public TextMeshProUGUI myStatsText;     // Drag the "Your Rank/Kills" Text here
+    public GameObject gameOverPanel;
+    public Transform top3Container;
+    public GameObject playerRowPrefab;
+    public TextMeshProUGUI winnerText;
+    public TextMeshProUGUI myStatsText;
 
     [Header("Lobby - Custom Room UI")]
     public GameObject customRoomPanel;
     public TMP_InputField roomNameInput;
     public TMP_InputField maxPlayersInput;
     public TMP_Dropdown timeSelectDropdown;
+
+    [Header("Host Only UI (hide for joiners)")]
+    public GameObject hostOnlyPanel;  // Parent panel containing maxPlayers + time
+  //  private Toggle isHostToggle;       // "I am creating the room" toggle
 
     [Header("Lobby - Mode Selection")]
     public TMP_Dropdown gameModeDropdown;
@@ -65,11 +66,11 @@ public class RoomManager : MonoBehaviourPunCallbacks
     private bool isPreGameCountdown = false;
     private bool isMatchLive = false;
     private bool timerHasStarted = false;
+    private bool isHost = false;
 
     private double preGameEndTime = 0;
     private double matchEndTime = 0;
 
-    // === CONFIG ===
     [Header("Config")]
     public float preGameLength = 10f;
     public float defaultMatchLength = 600f;
@@ -78,51 +79,55 @@ public class RoomManager : MonoBehaviourPunCallbacks
     private float matchLengthInSeconds;
     private string nickName = "unnamed";
 
-    // Stats
     public int kills = 0;
     public int deaths = 0;
 
-    // Room property keys
     private const string PROP_MAP = "Map";
     private const string PROP_MATCH_STATE = "MatchState";
     private const string PROP_PRE_END = "PreGameEnd";
     private const string PROP_MATCH_END = "MatchEnd";
     private const string PROP_MATCH_LENGTH = "MatchLength";
 
-    // join attempt state
     private int joinAttemptIndex = 0;
     private bool attemptingJoin = false;
 
     private void Awake()
     {
         instance = this;
-
-        // --- ADDED: RED LIGHT (RESET ON LOAD) ---
         gameIsLive = false;
-        // ----------------------------------------
 
         if (startButton != null)
         {
             startButton.interactable = false;
+            startButton.onClick.RemoveAllListeners();
             startButton.onClick.AddListener(OnStartButtonClicked);
         }
 
         if (gameModeDropdown != null)
         {
+            gameModeDropdown.onValueChanged.RemoveAllListeners();
             gameModeDropdown.onValueChanged.AddListener(OnGameModeChanged);
             OnGameModeChanged(gameModeDropdown.value);
         }
 
+     /*   // Wire host toggle
+        if (isHostToggle != null)
+        {
+            isHostToggle.onValueChanged.RemoveAllListeners();
+            isHostToggle.onValueChanged.AddListener(SetAsHost);
+            SetAsHost(false); // Default: joiner mode
+        }
+*/
         ChangeNickname();
 
         if (startTimerText != null) startTimerText.gameObject.SetActive(false);
         if (matchTimerText != null) matchTimerText.gameObject.SetActive(false);
         if (gameOverPanel != null) gameOverPanel.SetActive(false);
+        if (customRoomPanel != null) customRoomPanel.SetActive(false);
     }
 
     IEnumerator Start()
     {
-        // 1. If already connected (Returning from Shop), don't reconnect
         if (PhotonNetwork.IsConnectedAndReady && PhotonNetwork.InLobby)
         {
             if (startButton != null) startButton.interactable = true;
@@ -130,13 +135,9 @@ public class RoomManager : MonoBehaviourPunCallbacks
             yield break;
         }
 
-        // 2. Disconnect if stuck in a room
         if (PhotonNetwork.InRoom)
-        {
             PhotonNetwork.LeaveRoom();
-        }
 
-        // 3. Connect
         if (!PhotonNetwork.IsConnected)
         {
             yield return new WaitUntil(() => !PhotonNetwork.IsConnected);
@@ -144,38 +145,171 @@ public class RoomManager : MonoBehaviourPunCallbacks
         }
     }
 
-    // ---------------- UI Logic ----------------
+    // =============================================
+    // HOST TOGGLE
+    // =============================================
+    public void SetAsHost(bool hostMode)
+    {
+        isHost = hostMode;
+
+        // Show host-only settings (max players + time) only for host
+        if (hostOnlyPanel != null)
+            hostOnlyPanel.SetActive(hostMode);
+
+        Debug.Log("Host mode: " + hostMode);
+    }
+
+    // =============================================
+    // GAME MODE DROPDOWN
+    // =============================================
     public void OnGameModeChanged(int idx)
     {
+        Debug.Log("Game mode changed to index: " + idx);
+
+        // Always reset host state when switching modes
+        isHost = false;
+     //   if (isHostToggle != null) isHostToggle.isOn = false;
+
         if (idx == 0)
         {
             currentGameMode = GameMode.Global;
             if (customRoomPanel) customRoomPanel.SetActive(false);
+            if (hostOnlyPanel) hostOnlyPanel.SetActive(false);
         }
         else
         {
             currentGameMode = GameMode.Custom;
             if (customRoomPanel) customRoomPanel.SetActive(true);
+            // Show host panel by default for custom room
+            if (hostOnlyPanel) hostOnlyPanel.SetActive(true);
         }
     }
-
+    // =============================================
+    // START BUTTON
+    // =============================================
     private void OnStartButtonClicked()
     {
-        if (currentGameMode == GameMode.Global)
+        int dropdownValue = 0;
+        if (gameModeDropdown != null)
+            dropdownValue = gameModeDropdown.value;
+
+        Debug.Log("Start clicked. Dropdown: " + dropdownValue);
+
+        if (dropdownValue == 0)
         {
+            // Global match
+            currentGameMode = GameMode.Global;
             joinAttemptIndex = 0;
             attemptingJoin = true;
             StartCoroutine(TryJoinOrCreateMapRoomCoroutine());
         }
         else
         {
-            if (roomNameInput == null || maxPlayersInput == null) return;
-            if (string.IsNullOrEmpty(roomNameInput.text) || string.IsNullOrEmpty(maxPlayersInput.text)) return;
-            JoinCustomRoom();
+            // Custom room
+            currentGameMode = GameMode.Custom;
+
+            if (roomNameInput == null || string.IsNullOrEmpty(roomNameInput.text.Trim()))
+            {
+                ShowStatus("Please enter a room name!");
+                return;
+            }
+
+            // Try to JOIN first — if room doesn't exist, CREATE it
+            // No toggle needed — joining handles both cases
+            string roomName = roomNameInput.text.Trim();
+            Debug.Log("Attempting to join room: " + roomName);
+
+            PhotonNetwork.JoinRoom(roomName);
+
+            if (startButtonText) startButtonText.text = "Connecting...";
+            if (startButton) startButton.interactable = false;
         }
     }
 
-    // ---------------- Matchmaking ----------------
+    public override void OnJoinRoomFailed(short returnCode, string message)
+    {
+        base.OnJoinRoomFailed(returnCode, message);
+        Debug.Log("Join failed: " + returnCode + " - " + message);
+
+        if (attemptingJoin)
+        {
+            joinAttemptIndex++;
+        }
+        else
+        {
+            // Room doesn't exist — this player becomes the host and creates it
+            Debug.Log("Room not found — becoming host and creating room...");
+            CreateCustomRoom();
+        }
+    }
+
+    // =============================================
+    // HOST CREATES ROOM
+    // =============================================
+    void CreateCustomRoom()
+    {
+        string roomName = roomNameInput.text.Trim();
+
+        // Read max players
+        byte maxPlayers = 4;
+        if (maxPlayersInput != null && !string.IsNullOrEmpty(maxPlayersInput.text))
+        {
+            byte.TryParse(maxPlayersInput.text, out maxPlayers);
+            maxPlayers = (byte)Mathf.Clamp(maxPlayers, 2, 20);
+        }
+
+        // Read match time
+        int selectedMinutes = 10;
+        if (timeSelectDropdown != null)
+        {
+            string optionText = timeSelectDropdown.options[timeSelectDropdown.value].text;
+            int.TryParse(optionText, out selectedMinutes);
+        }
+
+        RoomOptions options = new RoomOptions();
+        options.MaxPlayers = maxPlayers;
+        options.IsVisible = false;
+        options.IsOpen = true;
+
+        Hashtable roomProps = new Hashtable();
+        roomProps.Add(PROP_MATCH_LENGTH, selectedMinutes * 60);
+        roomProps.Add(PROP_MAP, Map1 ? "Map1" : "Map2");
+        roomProps.Add(PROP_MATCH_STATE, "Waiting");
+
+        options.CustomRoomProperties = roomProps;
+        options.CustomRoomPropertiesForLobby = new string[]
+        {
+        PROP_MATCH_LENGTH, PROP_MATCH_STATE, PROP_MAP
+        };
+
+        Debug.Log("Creating room: " + roomName +
+                  " | Max: " + maxPlayers +
+                  " | Time: " + selectedMinutes + " mins");
+
+        PhotonNetwork.CreateRoom(roomName, options, TypedLobby.Default);
+
+        if (startButtonText) startButtonText.text = "Creating...";
+        if (startButton) startButton.interactable = false;
+    }
+
+    // =============================================
+    // FRIEND JOINS ROOM BY NAME
+    // =============================================
+    void JoinCustomRoom()
+    {
+        string roomName = roomNameInput.text.Trim();
+
+        Debug.Log("Joining room: " + roomName);
+
+        PhotonNetwork.JoinRoom(roomName);
+
+        if (startButtonText) startButtonText.text = "Joining...";
+        if (startButton) startButton.interactable = false;
+    }
+
+    // =============================================
+    // GLOBAL MATCHMAKING
+    // =============================================
     IEnumerator TryJoinOrCreateMapRoomCoroutine()
     {
         if (startButton != null) startButton.interactable = false;
@@ -213,8 +347,8 @@ public class RoomManager : MonoBehaviourPunCallbacks
             if (attemptingJoin)
             {
                 if (PhotonNetwork.InRoom) PhotonNetwork.LeaveRoom();
-
                 joinAttemptIndex++;
+
                 if (joinAttemptIndex > 50)
                 {
                     Debug.LogError("Failed to find/create a waiting room.");
@@ -239,40 +373,9 @@ public class RoomManager : MonoBehaviourPunCallbacks
         return baseName + "_" + index;
     }
 
-    void JoinCustomRoom()
-    {
-        string roomName = roomNameInput.text;
-        byte maxPlayers;
-        if (!byte.TryParse(maxPlayersInput.text, out maxPlayers)) maxPlayers = 10;
-        maxPlayers = (byte)Mathf.Clamp(maxPlayers, 1, 20);
-
-        int selectedMinutes = 10;
-        if (timeSelectDropdown != null)
-        {
-            string optionText = timeSelectDropdown.options[timeSelectDropdown.value].text;
-            int.TryParse(optionText, out selectedMinutes);
-        }
-
-        RoomOptions options = new RoomOptions();
-        options.MaxPlayers = maxPlayers;
-        options.IsVisible = true;
-        options.IsOpen = true;
-
-        Hashtable roomProps = new Hashtable();
-        roomProps.Add(PROP_MATCH_LENGTH, selectedMinutes * 60);
-        roomProps.Add(PROP_MAP, Map1 ? "Map1" : "Map2");
-        roomProps.Add(PROP_MATCH_STATE, "Waiting");
-
-        options.CustomRoomProperties = roomProps;
-        options.CustomRoomPropertiesForLobby = new string[] { PROP_MATCH_LENGTH };
-
-        PhotonNetwork.JoinOrCreateRoom(roomName, options, TypedLobby.Default);
-
-        if (startButtonText) startButtonText.text = "Joining...";
-        startButton.interactable = false;
-    }
-
-    // ---------------- Photon Callbacks ----------------
+    // =============================================
+    // PHOTON CALLBACKS
+    // =============================================
     public override void OnConnectedToMaster()
     {
         base.OnConnectedToMaster();
@@ -283,14 +386,28 @@ public class RoomManager : MonoBehaviourPunCallbacks
     {
         base.OnJoinedLobby();
         if (startButton != null) startButton.interactable = true;
+        if (startButtonText != null) startButtonText.text = "Start";
+        Debug.Log("Joined Lobby. Ready.");
     }
 
     public override void OnJoinedRoom()
     {
         base.OnJoinedRoom();
-        if (attemptingJoin)
+
+        attemptingJoin = false;
+        StopAllCoroutines();
+
+        Debug.Log("Joined Room: " + PhotonNetwork.CurrentRoom.Name +
+                  " | Players: " + PhotonNetwork.CurrentRoom.PlayerCount +
+                  " | Max: " + PhotonNetwork.CurrentRoom.MaxPlayers);
+
+        // For global rooms only — reject if match already started
+        string roomName = PhotonNetwork.CurrentRoom.Name;
+        bool isGlobalRoom = roomName.StartsWith("Global_Map1") ||
+                            roomName.StartsWith("Global_Map2");
+
+        if (isGlobalRoom)
         {
-            bool accept = true;
             if (PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey(PROP_MATCH_STATE))
             {
                 string state = PhotonNetwork.CurrentRoom.CustomProperties[PROP_MATCH_STATE] as string;
@@ -299,19 +416,21 @@ public class RoomManager : MonoBehaviourPunCallbacks
                     if (PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey(PROP_MATCH_END))
                     {
                         double me = (double)PhotonNetwork.CurrentRoom.CustomProperties[PROP_MATCH_END];
-                        if (PhotonNetwork.Time < me) accept = false;
+                        if (PhotonNetwork.Time < me)
+                        {
+                            PhotonNetwork.LeaveRoom();
+                            joinAttemptIndex++;
+                            return;
+                        }
                     }
-                    else accept = false;
+                    else
+                    {
+                        PhotonNetwork.LeaveRoom();
+                        joinAttemptIndex++;
+                        return;
+                    }
                 }
             }
-
-            if (!accept)
-            {
-                PhotonNetwork.LeaveRoom();
-                joinAttemptIndex++;
-                return;
-            }
-            attemptingJoin = false;
         }
 
         if (MapSelectionUI) MapSelectionUI.SetActive(false);
@@ -347,23 +466,46 @@ public class RoomManager : MonoBehaviourPunCallbacks
         CheckPlayerCountAndStart();
     }
 
-    public override void OnJoinRoomFailed(short returnCode, string message)
+   /* public override void OnJoinRoomFailed(short returnCode, string message)
     {
         base.OnJoinRoomFailed(returnCode, message);
+        Debug.LogWarning("Join room failed: " + returnCode + " - " + message);
+
         if (attemptingJoin)
         {
             joinAttemptIndex++;
         }
         else
         {
+            // Custom room join failed
             if (startButton != null) startButton.interactable = true;
             if (startButtonText != null) startButtonText.text = "Start";
+            ShowStatus("Room not found! Ask your friend for the correct room name.");
+        }
+    }
+*/
+    public override void OnCreateRoomFailed(short returnCode, string message)
+    {
+        base.OnCreateRoomFailed(returnCode, message);
+        Debug.LogWarning("Create room failed: " + returnCode + " - " + message);
+
+        if (!attemptingJoin)
+        {
+            if (startButton != null) startButton.interactable = true;
+            if (startButtonText != null) startButtonText.text = "Start";
+
+            // Room name already taken
+            if (returnCode == 32766)
+                ShowStatus("Room name already exists! Choose another name.");
+            else
+                ShowStatus("Failed to create room: " + message);
         }
     }
 
     public override void OnPlayerEnteredRoom(Player newPlayer)
     {
         base.OnPlayerEnteredRoom(newPlayer);
+        Debug.Log("Player joined: " + newPlayer.NickName);
         UpdateStatusText();
         CheckPlayerCountAndStart();
     }
@@ -399,7 +541,9 @@ public class RoomManager : MonoBehaviourPunCallbacks
         }
     }
 
-    // ---------------- Update Loop ----------------
+    // =============================================
+    // UPDATE LOOP
+    // =============================================
     private void Update()
     {
         if (isPreGameCountdown && !playerSpawned)
@@ -410,7 +554,8 @@ public class RoomManager : MonoBehaviourPunCallbacks
                 if (startTimerText != null)
                 {
                     startTimerText.gameObject.SetActive(true);
-                    startTimerText.text = "Match Starting in: " + remaining.ToString("F1") + "s";
+                    startTimerText.text = "Match Starting in: " +
+                                          remaining.ToString("F1") + "s";
                 }
             }
             else
@@ -441,7 +586,9 @@ public class RoomManager : MonoBehaviourPunCallbacks
         }
     }
 
-    // ---------------- Master logic ----------------
+    // =============================================
+    // MATCH START LOGIC
+    // =============================================
     void CheckPlayerCountAndStart()
     {
         UpdateStatusText();
@@ -454,17 +601,50 @@ public class RoomManager : MonoBehaviourPunCallbacks
         }
 
         int players = PhotonNetwork.CurrentRoom.PlayerCount;
-        if (players >= minPlayersToStart)
+        int maxPlayers = PhotonNetwork.CurrentRoom.MaxPlayers;
+
+        string roomName = PhotonNetwork.CurrentRoom.Name;
+        bool isGlobalRoom = roomName.StartsWith("Global_Map1") ||
+                            roomName.StartsWith("Global_Map2");
+
+        if (isGlobalRoom)
         {
-            if (!timerHasStarted)
+            // Global — start when min players reached
+            if (players >= minPlayersToStart)
             {
-                if (!PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey(PROP_PRE_END))
+                TriggerPreGameCountdown();
+            }
+        }
+        else
+        {
+            // Custom — wait until room is completely full
+            if (players >= maxPlayers)
+            {
+                TriggerPreGameCountdown();
+            }
+            else
+            {
+                if (statusText != null)
                 {
-                    timerHasStarted = true;
-                    double preGameEnd = PhotonNetwork.Time + preGameLength;
-                    Hashtable props = new Hashtable { { PROP_PRE_END, preGameEnd } };
-                    PhotonNetwork.CurrentRoom.SetCustomProperties(props);
+                    statusText.gameObject.SetActive(true);
+                    statusText.text = "Waiting for friends: " +
+                                      players + "/" + maxPlayers +
+                                      "\nRoom: " + roomName;
                 }
+            }
+        }
+    }
+
+    void TriggerPreGameCountdown()
+    {
+        if (!timerHasStarted)
+        {
+            if (!PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey(PROP_PRE_END))
+            {
+                timerHasStarted = true;
+                double preGameEnd = PhotonNetwork.Time + preGameLength;
+                Hashtable props = new Hashtable { { PROP_PRE_END, preGameEnd } };
+                PhotonNetwork.CurrentRoom.SetCustomProperties(props);
             }
         }
     }
@@ -472,8 +652,15 @@ public class RoomManager : MonoBehaviourPunCallbacks
     void UpdateStatusText()
     {
         if (statusText == null) return;
+
+        string roomName = PhotonNetwork.CurrentRoom != null ?
+                          PhotonNetwork.CurrentRoom.Name : "";
+        bool isGlobalRoom = roomName.StartsWith("Global_Map1") ||
+                            roomName.StartsWith("Global_Map2");
+
         bool isWaiting = true;
-        if (PhotonNetwork.CurrentRoom != null && PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey(PROP_MATCH_STATE))
+        if (PhotonNetwork.CurrentRoom != null &&
+            PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey(PROP_MATCH_STATE))
         {
             string st = PhotonNetwork.CurrentRoom.CustomProperties[PROP_MATCH_STATE] as string;
             isWaiting = st == "Waiting";
@@ -482,23 +669,35 @@ public class RoomManager : MonoBehaviourPunCallbacks
         if (isWaiting && !isPreGameCountdown && !isMatchLive)
         {
             statusText.gameObject.SetActive(true);
-            statusText.text = "Waiting: " + PhotonNetwork.CurrentRoom.PlayerCount + "/" + PhotonNetwork.CurrentRoom.MaxPlayers;
+
+            if (isGlobalRoom)
+            {
+                statusText.text = "Waiting: " +
+                    PhotonNetwork.CurrentRoom.PlayerCount + "/" +
+                    PhotonNetwork.CurrentRoom.MaxPlayers;
+            }
+            else
+            {
+                statusText.text = "Waiting for friends: " +
+                    PhotonNetwork.CurrentRoom.PlayerCount + "/" +
+                    PhotonNetwork.CurrentRoom.MaxPlayers +
+                    "\nRoom: " + roomName;
+            }
         }
         else if (isPreGameCountdown) statusText.text = "Get Ready!";
         else if (isMatchLive) statusText.text = "Match Live";
     }
 
-    // ---------------- Game start / spawn ----------------
+    // =============================================
+    // GAME START
+    // =============================================
     public void StartGame()
     {
         if (playerSpawned) return;
 
         playerSpawned = true;
         isPreGameCountdown = false;
-
-        // --- ADDED: GREEN LIGHT (START ATTACKING) ---
         gameIsLive = true;
-        // --------------------------------------------
 
         if (statusText) statusText.gameObject.SetActive(false);
         if (roomCam) roomCam.SetActive(false);
@@ -524,17 +723,15 @@ public class RoomManager : MonoBehaviourPunCallbacks
         }
     }
 
-    // ---------------- END GAME & LEADERBOARD ----------------
+    // =============================================
+    // GAME END
+    // =============================================
     void EndGame()
     {
-        // --- ADDED: RED LIGHT (STOP ATTACKING) ---
         gameIsLive = false;
-        // -----------------------------------------
 
-        // CRASH FIX: If internet disconnected, stop safely
         if (!PhotonNetwork.IsConnected || PhotonNetwork.CurrentRoom == null)
         {
-            Debug.LogWarning("Disconnected before game end. Loading Lobby.");
             SceneManager.LoadScene("3_Lobby");
             return;
         }
@@ -542,7 +739,6 @@ public class RoomManager : MonoBehaviourPunCallbacks
         isMatchLive = false;
         if (matchTimerText != null) matchTimerText.text = "GAME OVER";
 
-        // Save Stats to Firebase
         if (FirebaseManager.instance != null)
         {
             FirebaseManager.instance.matchesPlayed++;
@@ -553,9 +749,7 @@ public class RoomManager : MonoBehaviourPunCallbacks
 
             FirebaseManager.instance.SaveData(
                 FirebaseManager.instance.myName,
-                newTotalKills,
-                newTotalDeaths,
-                newTotalCoins,
+                newTotalKills, newTotalDeaths, newTotalCoins,
                 FirebaseManager.instance.headIndex,
                 FirebaseManager.instance.helmetIndex,
                 FirebaseManager.instance.vestIndex,
@@ -568,10 +762,7 @@ public class RoomManager : MonoBehaviourPunCallbacks
             );
         }
 
-        // Show UI
         ShowGameOverUI();
-
-        // Unlock Cursor for UI
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
     }
@@ -582,60 +773,62 @@ public class RoomManager : MonoBehaviourPunCallbacks
         if (roomCam != null) roomCam.SetActive(true);
         if (playerObject != null) playerObject.SetActive(false);
 
-        // 1. Get Players & Sort by Kills
         var sortedPlayers = PhotonNetwork.PlayerList.OrderByDescending(p =>
-            p.CustomProperties.ContainsKey("kills") ? (int)p.CustomProperties["kills"] : 0
+            p.CustomProperties.ContainsKey("kills") ?
+            (int)p.CustomProperties["kills"] : 0
         ).ToList();
 
-        // 2. Clear old list
         if (top3Container != null)
-        {
-            foreach (Transform child in top3Container) Destroy(child.gameObject);
-        }
+            foreach (Transform child in top3Container)
+                Destroy(child.gameObject);
 
-        // 3. Create List using your Custom Prefab
         int count = 0;
         foreach (var p in sortedPlayers)
         {
-            if (count >= 3) break; // Top 3 Only
+            if (count >= 3) break;
 
-            // Get Data
-            int pKills = p.CustomProperties.ContainsKey("kills") ? (int)p.CustomProperties["kills"] : 0;
-            int pDeaths = p.CustomProperties.ContainsKey("deaths") ? (int)p.CustomProperties["deaths"] : 0;
+            int pKills = p.CustomProperties.ContainsKey("kills") ?
+                         (int)p.CustomProperties["kills"] : 0;
+            int pDeaths = p.CustomProperties.ContainsKey("deaths") ?
+                          (int)p.CustomProperties["deaths"] : 0;
 
             if (playerRowPrefab != null && top3Container != null)
             {
                 GameObject row = Instantiate(playerRowPrefab, top3Container);
-
-                // --- CONNECT TO YOUR NEW SCRIPT ---
                 PlayerListItem item = row.GetComponent<PlayerListItem>();
-                if (item != null)
-                {
-                    // Pass the data to the prefab
-                    item.Setup(p.NickName, pKills, pDeaths, count + 1);
-                }
+                if (item != null) item.Setup(p.NickName, pKills, pDeaths, count + 1);
             }
 
-            // Set Winner Text (Big text at top of screen)
             if (count == 0 && winnerText != null)
-            {
-                winnerText.text = $"WINNER\n{p.NickName}";
-            }
+                winnerText.text = "WINNER\n" + p.NickName;
+
             count++;
         }
 
-        // 4. Show My Stats (At the bottom)
         if (myStatsText != null)
         {
             int myRank = sortedPlayers.IndexOf(PhotonNetwork.LocalPlayer) + 1;
-            int myKills = PhotonNetwork.LocalPlayer.CustomProperties.ContainsKey("kills") ? (int)PhotonNetwork.LocalPlayer.CustomProperties["kills"] : 0;
-            myStatsText.text = $"RANK: #{myRank} | KILLS: {myKills}";
+            int myKills = PhotonNetwork.LocalPlayer.CustomProperties.ContainsKey("kills")
+                ? (int)PhotonNetwork.LocalPlayer.CustomProperties["kills"] : 0;
+            myStatsText.text = "RANK: #" + myRank + " | KILLS: " + myKills;
         }
+    }
+
+    // =============================================
+    // HELPERS
+    // =============================================
+    void ShowStatus(string message)
+    {
+        if (statusText != null)
+        {
+            statusText.gameObject.SetActive(true);
+            statusText.text = message;
+        }
+        Debug.Log("Status: " + message);
     }
 
     public void LeaveMatch()
     {
-        Debug.Log("Leaving Match via Button...");
         PhotonNetwork.LeaveRoom();
     }
 
@@ -649,7 +842,8 @@ public class RoomManager : MonoBehaviourPunCallbacks
     {
         if (spawnPoints == null || spawnPoints.Length == 0) return;
         Transform spawnPoint = spawnPoints[Random.Range(0, spawnPoints.Length)];
-        GameObject _player = PhotonNetwork.Instantiate(player.name, spawnPoint.position, Quaternion.identity);
+        GameObject _player = PhotonNetwork.Instantiate(
+            player.name, spawnPoint.position, Quaternion.identity);
         SetupPlayer(_player);
     }
 
@@ -657,7 +851,8 @@ public class RoomManager : MonoBehaviourPunCallbacks
     {
         if (spawnPoints1 == null || spawnPoints1.Length == 0) return;
         Transform spawnPoint = spawnPoints1[Random.Range(0, spawnPoints1.Length)];
-        GameObject _player = PhotonNetwork.Instantiate(player.name, spawnPoint.position, Quaternion.identity);
+        GameObject _player = PhotonNetwork.Instantiate(
+            player.name, spawnPoint.position, Quaternion.identity);
         SetupPlayer(_player);
     }
 
@@ -677,14 +872,14 @@ public class RoomManager : MonoBehaviourPunCallbacks
 
     public void ChangeNickname()
     {
-        if (FirebaseManager.instance != null && !string.IsNullOrEmpty(FirebaseManager.instance.myName))
+        if (FirebaseManager.instance != null &&
+            !string.IsNullOrEmpty(FirebaseManager.instance.myName))
             nickName = FirebaseManager.instance.myName;
         else
-        {
-            int randomNum = Random.Range(1000, 9999);
-            nickName = "Guest_" + randomNum;
-        }
-        if (PhotonNetwork.LocalPlayer != null) PhotonNetwork.LocalPlayer.NickName = nickName;
+            nickName = "Guest_" + Random.Range(1000, 9999);
+
+        if (PhotonNetwork.LocalPlayer != null)
+            PhotonNetwork.LocalPlayer.NickName = nickName;
     }
 
     public void SetHashes()
@@ -699,7 +894,10 @@ public class RoomManager : MonoBehaviourPunCallbacks
         catch { }
     }
 
-    public void MapUIActive(bool isActive) { if (MapSelectionUI) MapSelectionUI.SetActive(isActive); }
+    public void MapUIActive(bool isActive)
+    {
+        if (MapSelectionUI) MapSelectionUI.SetActive(isActive);
+    }
 
     public void choosMap(bool map)
     {

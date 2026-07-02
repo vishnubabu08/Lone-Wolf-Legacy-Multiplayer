@@ -9,7 +9,6 @@ public class BotSpawner : MonoBehaviourPunCallbacks
     [Header("Settings")]
     public GameObject botPrefab;
     public Transform[] spawnPoints;
-    public int maxPlayersInRoom = 20;
 
     private bool hasSpawned = false;
 
@@ -22,11 +21,9 @@ public class BotSpawner : MonoBehaviourPunCallbacks
     {
         if (!RoomManager.gameIsLive) return;
         if (hasSpawned) return;
+        if (!PhotonNetwork.IsMasterClient) return;
 
-        if (PhotonNetwork.IsMasterClient)
-        {
-            SpawnInitialBatch();
-        }
+        SpawnInitialBatch();
         hasSpawned = true;
     }
 
@@ -34,43 +31,54 @@ public class BotSpawner : MonoBehaviourPunCallbacks
     {
         if (botPrefab == null) return;
 
+        // Check if this is a custom (friends) room or global room
+        string roomName = PhotonNetwork.CurrentRoom.Name;
+        bool isGlobalRoom = roomName.StartsWith("Global_Map1") ||
+                            roomName.StartsWith("Global_Map2");
+
+        if (!isGlobalRoom)
+        {
+            Debug.Log("Custom room — no bots spawned.");
+            return;
+        }
+
         int realPlayers = PhotonNetwork.CurrentRoom.PlayerCount;
-        int botsNeeded = maxPlayersInRoom - realPlayers;
+        int roomMaxPlayers = PhotonNetwork.CurrentRoom.MaxPlayers;
+        int botsNeeded = roomMaxPlayers - realPlayers;
         if (botsNeeded < 0) botsNeeded = 0;
 
-        Debug.Log($"BOT SPAWNER: Spawning {botsNeeded} Bots.");
+        Debug.Log($"BOT SPAWNER: Room max={roomMaxPlayers} | " +
+                  $"Real={realPlayers} | Bots={botsNeeded}");
 
         for (int i = 0; i < botsNeeded; i++)
-        {
             SpawnSingleBot();
-        }
     }
 
-    // --- UPDATED: NOW ACCEPTS STATS (OPTIONAL) ---
-    public void SpawnSingleBot(string oldName = "", int oldScore = 0, int oldKills = 0, int oldDeaths = 0)
+    public void SpawnSingleBot(string oldName = "", int oldScore = 0,
+                               int oldKills = 0, int oldDeaths = 0)
     {
         if (botPrefab == null || spawnPoints.Length == 0) return;
 
-        // 1. Pick a random spawn point
         Transform sp = spawnPoints[Random.Range(0, spawnPoints.Length)];
-        Vector3 randomPosition = sp.position + new Vector3(Random.Range(-3f, 3f), 0, Random.Range(-3f, 3f));
+        Vector3 randomPosition = sp.position + new Vector3(
+            Random.Range(-3f, 3f), 0, Random.Range(-3f, 3f));
 
-        // 2. Spawn safely on NavMesh
-        Vector3 finalPos = sp.position + Vector3.up * 2f; // Default air spawn
+        Vector3 finalPos = sp.position + Vector3.up * 2f;
         UnityEngine.AI.NavMeshHit hit;
-        if (UnityEngine.AI.NavMesh.SamplePosition(randomPosition, out hit, 10.0f, UnityEngine.AI.NavMesh.AllAreas))
+        if (UnityEngine.AI.NavMesh.SamplePosition(
+            randomPosition, out hit, 10.0f, UnityEngine.AI.NavMesh.AllAreas))
         {
             finalPos = hit.position;
         }
 
-        // 3. Instantiate the Bot
-        GameObject newBot = PhotonNetwork.Instantiate(botPrefab.name, finalPos, Quaternion.identity);
+        GameObject newBot = PhotonNetwork.Instantiate(
+            botPrefab.name, finalPos, Quaternion.identity);
 
-        // 4. RESTORE STATS (If this is a respawn)
         if (!string.IsNullOrEmpty(oldName))
         {
-            // Call the RPC we made in BotController to inject the old score
-            newBot.GetComponent<PhotonView>().RPC("RPC_LoadOldStats", RpcTarget.All, oldName, oldScore, oldKills, oldDeaths);
+            newBot.GetComponent<PhotonView>().RPC(
+                "RPC_LoadOldStats", RpcTarget.All,
+                oldName, oldScore, oldKills, oldDeaths);
         }
     }
 }
