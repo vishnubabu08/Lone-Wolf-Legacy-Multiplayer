@@ -58,6 +58,12 @@ public class CharacterShop : MonoBehaviour
         UpdateAllModels();
         UpdateUI();
     }
+    // In CharacterShop.cs Update()
+    private void Update()
+    {
+        if (FirebaseManager.instance != null && coinsText != null)
+            coinsText.text = "Coins: " + FirebaseManager.instance.myCoins;
+    }
 
     // --- HELPER TO READ "1010" STRING ---
     void LoadOwnership(string data, ItemBlueprint[] items)

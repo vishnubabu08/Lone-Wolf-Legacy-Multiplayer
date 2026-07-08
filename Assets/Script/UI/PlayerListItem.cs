@@ -8,19 +8,26 @@ public class PlayerListItem : MonoBehaviour
     public TextMeshProUGUI killsText;
     public TextMeshProUGUI deathsText;
     public TextMeshProUGUI coinsText;
+    public TextMeshProUGUI rankText;  // Add this — shows #1 #2 #3
 
     public void Setup(string name, int kills, int deaths, int rank)
     {
-        nameText.text = name;
-        killsText.text = "KILL : " + kills;
-        deathsText.text = "DEATH : " + deaths;
+        // Rank medal
+        if (rankText != null)
+        {
+            if (rank == 1) rankText.text = "🥇";
+            else if (rank == 2) rankText.text = "🥈";
+            else if (rank == 3) rankText.text = "🥉";
+            else rankText.text = "#" + rank;
+        }
 
-        // Logic: Calculate coins based on kills (e.g., 1 Kill = 10 Coins)
-        int coinsEarned = kills * 10;
+        if (nameText != null) nameText.text = name;
+        if (killsText != null) killsText.text = "KILLS: " + kills;
+        if (deathsText != null) deathsText.text = "DEATHS: " + deaths;
 
-        // Bonus for winning (Rank 1)
-        if (rank == 1) coinsEarned += 100;
-
-        coinsText.text = "+" + coinsEarned + " Coins";
+        // Coins earned this match
+        int coinsEarned = kills * 2;
+        if (rank == 1) coinsEarned += 100; // Winner bonus
+        if (coinsText != null) coinsText.text = "+" + coinsEarned + " Coins";
     }
 }

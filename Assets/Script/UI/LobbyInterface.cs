@@ -5,38 +5,48 @@ using TMPro;
 public class LobbyInterface : MonoBehaviour
 {
     [Header("UI References")]
-    public TextMeshProUGUI playerNameText; // Shows "PlayerName"
-    public TextMeshProUGUI playerCoinsText; // Shows "Coins: 500"
+    public TextMeshProUGUI playerNameText;
+    public TextMeshProUGUI playerCoinsText;
 
     void Start()
     {
-        // 1. Ensure Cursor is visible in Lobby (Critical for PC)
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
 
-        // 2. Load Data from FirebaseManager
+        RefreshUI();
+    }
+
+    // =============================================
+    // Call this anytime coins change
+    // =============================================
+    public void RefreshUI()
+    {
         if (FirebaseManager.instance != null)
         {
-            // Set Name
             if (playerNameText)
                 playerNameText.text = FirebaseManager.instance.myName;
 
-            // Set Coins
             if (playerCoinsText)
                 playerCoinsText.text = "Coins: " + FirebaseManager.instance.myCoins;
         }
         else
         {
-            // Fallback for testing without logging in
             if (playerNameText) playerNameText.text = "TestPlayer";
+            if (playerCoinsText) playerCoinsText.text = "Coins: 0";
         }
     }
 
-    // --- BUTTON FUNCTION ---
+    // Called every frame to keep coins synced
+    private void Update()
+    {
+        if (FirebaseManager.instance != null && playerCoinsText != null)
+        {
+            playerCoinsText.text = "Coins: " + FirebaseManager.instance.myCoins;
+        }
+    }
+
     public void OnCustomizeClicked()
     {
-        // Save current state just in case
-        // Go to Character Customization Scene
         SceneManager.LoadScene("2_Character");
     }
 

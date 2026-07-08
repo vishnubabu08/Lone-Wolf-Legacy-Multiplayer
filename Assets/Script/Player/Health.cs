@@ -219,10 +219,15 @@ public class Health : MonoBehaviourPun, IPunObservable
                 {
                     if (PhotonNetwork.IsMasterClient) bot.GiveKill(100);
                 }
+                // In TakeDamage, where attacker gets kill credit
+                // In TakeDamage where attacker gets kill credit
                 else if (attacker.Owner != null)
                 {
                     Photon.Realtime.Player player = attacker.Owner;
+
+                    // ADD score for this kill only
                     player.AddScore(100);
+
                     if (PhotonNetwork.IsMasterClient)
                     {
                         var props = player.CustomProperties;

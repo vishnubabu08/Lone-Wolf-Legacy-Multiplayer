@@ -43,6 +43,12 @@ public class WeaponShop : MonoBehaviour
         UpdateUI();
     }
 
+    private void Update()
+    {
+        if (FirebaseManager.instance != null && coinsText != null)
+            coinsText.text = "Coins: " + FirebaseManager.instance.myCoins;
+    }
+
     public void NextGun()
     {
         currentGunIndex++;

@@ -81,14 +81,17 @@ public class LeaderBoard : MonoBehaviour
         foreach (var bot in activeBots)
         {
             // Only show alive bots or bots that haven't been destroyed yet
-            PlayerData b = new PlayerData();
-            b.name = bot.botName; // Uses the name we added to BotController
-            b.score = bot.score;
-            b.kills = bot.kills;
-            b.deaths = bot.deaths;
-            b.isLocal = false; // Bots are never "Local"
+            if (bot != null)
+            {
+                PlayerData b = new PlayerData();
+                b.name = bot.botName; // Uses the name we added to BotController
+                b.score = bot.score;
+                b.kills = bot.kills;
+                b.deaths = bot.deaths;
+                b.isLocal = false; // Bots are never "Local"
 
-            allPlayers.Add(b);
+                allPlayers.Add(b);
+            }
         }
 
         // 3. SORT LIST (Highest Score First)
@@ -104,9 +107,9 @@ public class LeaderBoard : MonoBehaviour
 
             slots[i].SetActive(true);
 
-            nameText[i].text = player.name;
-            scoreText[i].text = player.score.ToString();
-            kdText[i].text = $"{player.kills}/{player.deaths}";
+            if (nameText[i]) nameText[i].text = player.name;
+            if (scoreText[i]) scoreText[i].text = player.score.ToString();
+            if (kdText[i]) kdText[i].text = $"{player.kills}/{player.deaths}";
 
             // Update the small HUD for the Local Player
             if (player.isLocal)
@@ -121,14 +124,27 @@ public class LeaderBoard : MonoBehaviour
 
     private void Update()
     {
-        // Hide/Show logic
-        if (RoomManager.instance != null && wholeUI != null)
+        // 1. Are we actually inside a game room right now?
+        if (PhotonNetwork.InRoom)
         {
-            wholeUI.SetActive(RoomManager.instance.playerSpawned);
+            // IN A MATCH: Only show the UI if the player character has actually spawned
+            if (RoomManager.instance != null && wholeUI != null)
+            {
+                wholeUI.SetActive(RoomManager.instance.playerSpawned);
+            }
+        }
+        else
+        {
+            // IN THE LOBBY: We force wholeUI to stay ON. 
+            // This guarantees the TAB menu isn't blocked by a hidden parent object.
+            if (wholeUI != null)
+            {
+                wholeUI.SetActive(true);
+            }
         }
 
-        // Hold TAB to see leaderboard
-        if (leaderboardUI != null)
+        // 2. The TAB key logic
+        if (leaderboardUI != null&& PhotonNetwork.InRoom)
         {
             leaderboardUI.SetActive(Input.GetKey(KeyCode.Tab));
         }

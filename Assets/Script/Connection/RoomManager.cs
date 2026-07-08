@@ -1,20 +1,22 @@
-﻿using UnityEngine;
-using Photon.Pun;
+﻿using Photon.Pun;
 using Photon.Realtime;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using TMPro;
+using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using Hashtable = ExitGames.Client.Photon.Hashtable;
-using System.Collections;
-using UnityEngine.SceneManagement;
-using System.Linq;
+using Photon.Pun.UtilityScripts;
 
 public class RoomManager : MonoBehaviourPunCallbacks
 {
     public static RoomManager instance;
-
     public static bool gameIsLive = false;
 
     public enum GameMode { Global, Custom }
+
     [Header("Game Mode")]
     public GameMode currentGameMode = GameMode.Global;
 
@@ -28,6 +30,7 @@ public class RoomManager : MonoBehaviourPunCallbacks
     public GameObject playerObject;
     public Button startButton;
     public TextMeshProUGUI startButtonText;
+    public Button cancelButton;
 
     [Header("Status & Timer UI")]
     public TextMeshProUGUI statusText;
@@ -46,13 +49,16 @@ public class RoomManager : MonoBehaviourPunCallbacks
     public TMP_InputField roomNameInput;
     public TMP_InputField maxPlayersInput;
     public TMP_Dropdown timeSelectDropdown;
-
-    [Header("Host Only UI (hide for joiners)")]
-    public GameObject hostOnlyPanel;  // Parent panel containing maxPlayers + time
-  //  private Toggle isHostToggle;       // "I am creating the room" toggle
+    public GameObject hostOnlyPanel;
+    public GameObject MiniMap;
+    public GameObject RooMPanel;
 
     [Header("Lobby - Mode Selection")]
     public TMP_Dropdown gameModeDropdown;
+
+    [Header("Dropdown Index Config")]
+    public int globalModeIndex = 0;
+    public int customModeIndex = 1;
 
     [Header("Map Settings")]
     public GameObject MapSelectionUI;
@@ -61,21 +67,20 @@ public class RoomManager : MonoBehaviourPunCallbacks
     public bool Map1 = true;
     public bool Map2 = false;
 
-    // --- FLAGS & TIMERS ---
-    public bool playerSpawned = false;
-    private bool isPreGameCountdown = false;
-    private bool isMatchLive = false;
-    private bool timerHasStarted = false;
-    private bool isHost = false;
-
-    private double preGameEndTime = 0;
-    private double matchEndTime = 0;
-
     [Header("Config")]
     public float preGameLength = 10f;
     public float defaultMatchLength = 600f;
     public int minPlayersToStart = 1;
 
+    // Flags
+    public bool playerSpawned = false;
+    private bool isPreGameCountdown = false;
+    private bool isMatchLive = false;
+    private bool timerHasStarted = false;
+    private bool isCustomRoom = false;
+
+    private double preGameEndTime = 0;
+    private double matchEndTime = 0;
     private float matchLengthInSeconds;
     private string nickName = "unnamed";
 
@@ -103,6 +108,13 @@ public class RoomManager : MonoBehaviourPunCallbacks
             startButton.onClick.AddListener(OnStartButtonClicked);
         }
 
+        if (cancelButton != null)
+        {
+            cancelButton.gameObject.SetActive(false);
+            cancelButton.onClick.RemoveAllListeners();
+            cancelButton.onClick.AddListener(CancelCustomRoom);
+        }
+
         if (gameModeDropdown != null)
         {
             gameModeDropdown.onValueChanged.RemoveAllListeners();
@@ -110,20 +122,13 @@ public class RoomManager : MonoBehaviourPunCallbacks
             OnGameModeChanged(gameModeDropdown.value);
         }
 
-     /*   // Wire host toggle
-        if (isHostToggle != null)
-        {
-            isHostToggle.onValueChanged.RemoveAllListeners();
-            isHostToggle.onValueChanged.AddListener(SetAsHost);
-            SetAsHost(false); // Default: joiner mode
-        }
-*/
         ChangeNickname();
 
         if (startTimerText != null) startTimerText.gameObject.SetActive(false);
         if (matchTimerText != null) matchTimerText.gameObject.SetActive(false);
         if (gameOverPanel != null) gameOverPanel.SetActive(false);
         if (customRoomPanel != null) customRoomPanel.SetActive(false);
+        if (hostOnlyPanel != null) hostOnlyPanel.SetActive(false);
     }
 
     IEnumerator Start()
@@ -146,67 +151,55 @@ public class RoomManager : MonoBehaviourPunCallbacks
     }
 
     // =============================================
-    // HOST TOGGLE
-    // =============================================
-    public void SetAsHost(bool hostMode)
-    {
-        isHost = hostMode;
-
-        // Show host-only settings (max players + time) only for host
-        if (hostOnlyPanel != null)
-            hostOnlyPanel.SetActive(hostMode);
-
-        Debug.Log("Host mode: " + hostMode);
-    }
-
-    // =============================================
-    // GAME MODE DROPDOWN
+    // DROPDOWN CHANGED
     // =============================================
     public void OnGameModeChanged(int idx)
     {
-        Debug.Log("Game mode changed to index: " + idx);
+        Debug.Log("Dropdown index changed to: " + idx);
 
-        // Always reset host state when switching modes
-        isHost = false;
-     //   if (isHostToggle != null) isHostToggle.isOn = false;
-
-        if (idx == 0)
+        if (idx == customModeIndex)
+        {
+            currentGameMode = GameMode.Custom;
+            if (customRoomPanel) customRoomPanel.SetActive(true);
+            if (hostOnlyPanel) hostOnlyPanel.SetActive(true);
+            Debug.Log("Mode: CUSTOM ROOM");
+        }
+        else
         {
             currentGameMode = GameMode.Global;
             if (customRoomPanel) customRoomPanel.SetActive(false);
             if (hostOnlyPanel) hostOnlyPanel.SetActive(false);
-        }
-        else
-        {
-            currentGameMode = GameMode.Custom;
-            if (customRoomPanel) customRoomPanel.SetActive(true);
-            // Show host panel by default for custom room
-            if (hostOnlyPanel) hostOnlyPanel.SetActive(true);
+            Debug.Log("Mode: GLOBAL MATCH");
         }
     }
+
     // =============================================
     // START BUTTON
     // =============================================
     private void OnStartButtonClicked()
     {
-        int dropdownValue = 0;
-        if (gameModeDropdown != null)
-            dropdownValue = gameModeDropdown.value;
+        int dropdownValue = gameModeDropdown != null ? gameModeDropdown.value : 0;
 
-        Debug.Log("Start clicked. Dropdown: " + dropdownValue);
+        Debug.Log("=== START CLICKED ===");
+        Debug.Log("Dropdown value: " + dropdownValue);
+        Debug.Log("globalModeIndex: " + globalModeIndex);
+        Debug.Log("customModeIndex: " + customModeIndex);
+        Debug.Log("currentGameMode: " + currentGameMode);
 
-        if (dropdownValue == 0)
+        if (dropdownValue == globalModeIndex)
         {
-            // Global match
+            Debug.Log("Starting GLOBAL match");
             currentGameMode = GameMode.Global;
+            isCustomRoom = false;
             joinAttemptIndex = 0;
             attemptingJoin = true;
             StartCoroutine(TryJoinOrCreateMapRoomCoroutine());
         }
-        else
+        else if (dropdownValue == customModeIndex)
         {
-            // Custom room
+            Debug.Log("Starting CUSTOM room");
             currentGameMode = GameMode.Custom;
+            isCustomRoom = true;
 
             if (roomNameInput == null || string.IsNullOrEmpty(roomNameInput.text.Trim()))
             {
@@ -214,10 +207,8 @@ public class RoomManager : MonoBehaviourPunCallbacks
                 return;
             }
 
-            // Try to JOIN first — if room doesn't exist, CREATE it
-            // No toggle needed — joining handles both cases
             string roomName = roomNameInput.text.Trim();
-            Debug.Log("Attempting to join room: " + roomName);
+            Debug.Log("Trying to join room: " + roomName);
 
             PhotonNetwork.JoinRoom(roomName);
 
@@ -226,6 +217,71 @@ public class RoomManager : MonoBehaviourPunCallbacks
         }
     }
 
+    // =============================================
+    // CANCEL CUSTOM ROOM
+    // =============================================
+    public void CancelCustomRoom()
+    {
+        Debug.Log("Cancelling custom room...");
+
+        if (cancelButton != null) cancelButton.gameObject.SetActive(false);
+
+        if (PhotonNetwork.InRoom)
+        {
+            if (PhotonNetwork.IsMasterClient)
+            {
+                PhotonNetwork.CurrentRoom.IsOpen = false;
+                PhotonNetwork.CurrentRoom.IsVisible = false;
+            }
+            PhotonNetwork.LeaveRoom();
+            // OnLeftRoom handles UI reset
+        }
+        else
+        {
+            ResetToLobbyUI();
+        }
+    }
+
+    // =============================================
+    // RESET LOBBY UI
+    // =============================================
+    void ResetToLobbyUI()
+    {
+        if (startButton != null)
+        {
+            startButton.gameObject.SetActive(true);
+            startButton.interactable = true;
+        }
+        if (startButtonText != null) startButtonText.text = "Start";
+        if (statusText != null) statusText.gameObject.SetActive(false);
+        if (cancelButton != null) cancelButton.gameObject.SetActive(false);
+        if (gameModeDropdown != null) gameModeDropdown.gameObject.SetActive(true);
+
+        int idx = gameModeDropdown != null ? gameModeDropdown.value : 0;
+        if (idx == customModeIndex)
+        {
+            if (customRoomPanel != null) customRoomPanel.SetActive(true);
+            if (hostOnlyPanel != null) hostOnlyPanel.SetActive(true);
+        }
+        else
+        {
+            if (customRoomPanel != null) customRoomPanel.SetActive(false);
+            if (hostOnlyPanel != null) hostOnlyPanel.SetActive(false);
+        }
+
+        isCustomRoom = false;
+        attemptingJoin = false;
+        timerHasStarted = false;
+        playerSpawned = false;
+        isPreGameCountdown = false;
+        isMatchLive = false;
+
+        Debug.Log("Lobby UI reset.");
+    }
+
+    // =============================================
+    // JOIN FAILED
+    // =============================================
     public override void OnJoinRoomFailed(short returnCode, string message)
     {
         base.OnJoinRoomFailed(returnCode, message);
@@ -235,22 +291,26 @@ public class RoomManager : MonoBehaviourPunCallbacks
         {
             joinAttemptIndex++;
         }
+        else if (isCustomRoom)
+        {
+            Debug.Log("Room not found — creating as host...");
+            CreateCustomRoom();
+        }
         else
         {
-            // Room doesn't exist — this player becomes the host and creates it
-            Debug.Log("Room not found — becoming host and creating room...");
-            CreateCustomRoom();
+            if (startButton != null) startButton.interactable = true;
+            if (startButtonText != null) startButtonText.text = "Start";
+            ShowStatus("Failed to join: " + message);
         }
     }
 
     // =============================================
-    // HOST CREATES ROOM
+    // CREATE CUSTOM ROOM
     // =============================================
     void CreateCustomRoom()
     {
         string roomName = roomNameInput.text.Trim();
 
-        // Read max players
         byte maxPlayers = 4;
         if (maxPlayersInput != null && !string.IsNullOrEmpty(maxPlayersInput.text))
         {
@@ -258,7 +318,6 @@ public class RoomManager : MonoBehaviourPunCallbacks
             maxPlayers = (byte)Mathf.Clamp(maxPlayers, 2, 20);
         }
 
-        // Read match time
         int selectedMinutes = 10;
         if (timeSelectDropdown != null)
         {
@@ -279,7 +338,7 @@ public class RoomManager : MonoBehaviourPunCallbacks
         options.CustomRoomProperties = roomProps;
         options.CustomRoomPropertiesForLobby = new string[]
         {
-        PROP_MATCH_LENGTH, PROP_MATCH_STATE, PROP_MAP
+            PROP_MATCH_LENGTH, PROP_MATCH_STATE, PROP_MAP
         };
 
         Debug.Log("Creating room: " + roomName +
@@ -292,19 +351,18 @@ public class RoomManager : MonoBehaviourPunCallbacks
         if (startButton) startButton.interactable = false;
     }
 
-    // =============================================
-    // FRIEND JOINS ROOM BY NAME
-    // =============================================
-    void JoinCustomRoom()
+    public override void OnCreateRoomFailed(short returnCode, string message)
     {
-        string roomName = roomNameInput.text.Trim();
+        base.OnCreateRoomFailed(returnCode, message);
+        Debug.LogWarning("Create room failed: " + returnCode + " - " + message);
 
-        Debug.Log("Joining room: " + roomName);
+        if (startButton != null) startButton.interactable = true;
+        if (startButtonText != null) startButtonText.text = "Start";
 
-        PhotonNetwork.JoinRoom(roomName);
-
-        if (startButtonText) startButtonText.text = "Joining...";
-        if (startButton) startButton.interactable = false;
+        if (returnCode == 32766)
+            ShowStatus("Room already exists! Try joining it.");
+        else
+            ShowStatus("Failed to create room: " + message);
     }
 
     // =============================================
@@ -351,7 +409,7 @@ public class RoomManager : MonoBehaviourPunCallbacks
 
                 if (joinAttemptIndex > 50)
                 {
-                    Debug.LogError("Failed to find/create a waiting room.");
+                    Debug.LogError("Could not find or create a room.");
                     attemptingJoin = false;
                     if (startButton != null) startButton.interactable = true;
                     if (startButtonText != null) startButtonText.text = "Start";
@@ -397,15 +455,16 @@ public class RoomManager : MonoBehaviourPunCallbacks
         attemptingJoin = false;
         StopAllCoroutines();
 
-        Debug.Log("Joined Room: " + PhotonNetwork.CurrentRoom.Name +
-                  " | Players: " + PhotonNetwork.CurrentRoom.PlayerCount +
-                  " | Max: " + PhotonNetwork.CurrentRoom.MaxPlayers);
-
-        // For global rooms only — reject if match already started
         string roomName = PhotonNetwork.CurrentRoom.Name;
         bool isGlobalRoom = roomName.StartsWith("Global_Map1") ||
                             roomName.StartsWith("Global_Map2");
 
+        Debug.Log("Joined Room: " + roomName +
+                  " | Players: " + PhotonNetwork.CurrentRoom.PlayerCount +
+                  " | Max: " + PhotonNetwork.CurrentRoom.MaxPlayers +
+                  " | IsGlobal: " + isGlobalRoom);
+
+        // Reject if global room match already started
         if (isGlobalRoom)
         {
             if (PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey(PROP_MATCH_STATE))
@@ -413,30 +472,22 @@ public class RoomManager : MonoBehaviourPunCallbacks
                 string state = PhotonNetwork.CurrentRoom.CustomProperties[PROP_MATCH_STATE] as string;
                 if (state == "Started")
                 {
-                    if (PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey(PROP_MATCH_END))
-                    {
-                        double me = (double)PhotonNetwork.CurrentRoom.CustomProperties[PROP_MATCH_END];
-                        if (PhotonNetwork.Time < me)
-                        {
-                            PhotonNetwork.LeaveRoom();
-                            joinAttemptIndex++;
-                            return;
-                        }
-                    }
-                    else
-                    {
-                        PhotonNetwork.LeaveRoom();
-                        joinAttemptIndex++;
-                        return;
-                    }
+                    PhotonNetwork.LeaveRoom();
+                    joinAttemptIndex++;
+                    return;
                 }
             }
         }
 
         if (MapSelectionUI) MapSelectionUI.SetActive(false);
         if (customRoomPanel) customRoomPanel.SetActive(false);
+        if (hostOnlyPanel) hostOnlyPanel.SetActive(false);
         if (gameModeDropdown) gameModeDropdown.gameObject.SetActive(false);
         if (startButton) startButton.gameObject.SetActive(false);
+
+        // Show cancel button only for custom rooms
+        if (cancelButton != null)
+            cancelButton.gameObject.SetActive(!isGlobalRoom);
 
         timerHasStarted = false;
         playerSpawned = false;
@@ -466,46 +517,11 @@ public class RoomManager : MonoBehaviourPunCallbacks
         CheckPlayerCountAndStart();
     }
 
-   /* public override void OnJoinRoomFailed(short returnCode, string message)
-    {
-        base.OnJoinRoomFailed(returnCode, message);
-        Debug.LogWarning("Join room failed: " + returnCode + " - " + message);
-
-        if (attemptingJoin)
-        {
-            joinAttemptIndex++;
-        }
-        else
-        {
-            // Custom room join failed
-            if (startButton != null) startButton.interactable = true;
-            if (startButtonText != null) startButtonText.text = "Start";
-            ShowStatus("Room not found! Ask your friend for the correct room name.");
-        }
-    }
-*/
-    public override void OnCreateRoomFailed(short returnCode, string message)
-    {
-        base.OnCreateRoomFailed(returnCode, message);
-        Debug.LogWarning("Create room failed: " + returnCode + " - " + message);
-
-        if (!attemptingJoin)
-        {
-            if (startButton != null) startButton.interactable = true;
-            if (startButtonText != null) startButtonText.text = "Start";
-
-            // Room name already taken
-            if (returnCode == 32766)
-                ShowStatus("Room name already exists! Choose another name.");
-            else
-                ShowStatus("Failed to create room: " + message);
-        }
-    }
-
     public override void OnPlayerEnteredRoom(Player newPlayer)
     {
         base.OnPlayerEnteredRoom(newPlayer);
-        Debug.Log("Player joined: " + newPlayer.NickName);
+        Debug.Log("Player joined: " + newPlayer.NickName +
+                  " | Total: " + PhotonNetwork.CurrentRoom.PlayerCount);
         UpdateStatusText();
         CheckPlayerCountAndStart();
     }
@@ -542,7 +558,7 @@ public class RoomManager : MonoBehaviourPunCallbacks
     }
 
     // =============================================
-    // UPDATE LOOP
+    // UPDATE
     // =============================================
     private void Update()
     {
@@ -602,28 +618,34 @@ public class RoomManager : MonoBehaviourPunCallbacks
 
         int players = PhotonNetwork.CurrentRoom.PlayerCount;
         int maxPlayers = PhotonNetwork.CurrentRoom.MaxPlayers;
-
         string roomName = PhotonNetwork.CurrentRoom.Name;
+
         bool isGlobalRoom = roomName.StartsWith("Global_Map1") ||
                             roomName.StartsWith("Global_Map2");
 
+        Debug.Log("CheckPlayerCountAndStart — isGlobal: " + isGlobalRoom +
+                  " | players: " + players + "/" + maxPlayers);
+
+        if (isGlobalRoom && cancelButton != null)
+            cancelButton.gameObject.SetActive(false);
+
         if (isGlobalRoom)
         {
-            // Global — start when min players reached
             if (players >= minPlayersToStart)
-            {
                 TriggerPreGameCountdown();
-            }
         }
         else
         {
-            // Custom — wait until room is completely full
             if (players >= maxPlayers)
             {
+                if (cancelButton != null) cancelButton.gameObject.SetActive(false);
+                Debug.Log("Custom room full — starting countdown!");
                 TriggerPreGameCountdown();
             }
             else
             {
+                if (cancelButton != null) cancelButton.gameObject.SetActive(true);
+
                 if (statusText != null)
                 {
                     statusText.gameObject.SetActive(true);
@@ -637,16 +659,14 @@ public class RoomManager : MonoBehaviourPunCallbacks
 
     void TriggerPreGameCountdown()
     {
-        if (!timerHasStarted)
-        {
-            if (!PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey(PROP_PRE_END))
-            {
-                timerHasStarted = true;
-                double preGameEnd = PhotonNetwork.Time + preGameLength;
-                Hashtable props = new Hashtable { { PROP_PRE_END, preGameEnd } };
-                PhotonNetwork.CurrentRoom.SetCustomProperties(props);
-            }
-        }
+        if (timerHasStarted) return;
+        if (PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey(PROP_PRE_END)) return;
+
+        timerHasStarted = true;
+        double preGameEnd = PhotonNetwork.Time + preGameLength;
+        Hashtable props = new Hashtable { { PROP_PRE_END, preGameEnd } };
+        PhotonNetwork.CurrentRoom.SetCustomProperties(props);
+        Debug.Log("Countdown triggered. Starts in " + preGameLength + "s");
     }
 
     void UpdateStatusText()
@@ -669,35 +689,51 @@ public class RoomManager : MonoBehaviourPunCallbacks
         if (isWaiting && !isPreGameCountdown && !isMatchLive)
         {
             statusText.gameObject.SetActive(true);
-
             if (isGlobalRoom)
-            {
                 statusText.text = "Waiting: " +
                     PhotonNetwork.CurrentRoom.PlayerCount + "/" +
                     PhotonNetwork.CurrentRoom.MaxPlayers;
-            }
             else
-            {
                 statusText.text = "Waiting for friends: " +
                     PhotonNetwork.CurrentRoom.PlayerCount + "/" +
                     PhotonNetwork.CurrentRoom.MaxPlayers +
                     "\nRoom: " + roomName;
-            }
         }
         else if (isPreGameCountdown) statusText.text = "Get Ready!";
         else if (isMatchLive) statusText.text = "Match Live";
     }
-
+    
     // =============================================
-    // GAME START
+    // START GAME
     // =============================================
     public void StartGame()
     {
         if (playerSpawned) return;
 
+        if (cancelButton != null) cancelButton.gameObject.SetActive(false);
+
         playerSpawned = true;
         isPreGameCountdown = false;
         gameIsLive = true;
+        MiniMap.SetActive(true);
+        RooMPanel.SetActive(false);
+
+        // =============================================
+        // RESET MATCH STATS FOR NEW MATCH
+        // =============================================
+        kills = 0;
+        deaths = 0;
+
+        // Reset Photon custom properties so leaderboard starts fresh
+        ExitGames.Client.Photon.Hashtable resetProps = new ExitGames.Client.Photon.Hashtable();
+        resetProps["kills"] = 0;
+        resetProps["deaths"] = 0;
+        PhotonNetwork.LocalPlayer.SetCustomProperties(resetProps);
+
+        PhotonNetwork.LocalPlayer.SetScore(0);
+
+        Debug.Log("Match stats reset. kills=0 deaths=0");
+        // =============================================
 
         if (statusText) statusText.gameObject.SetActive(false);
         if (roomCam) roomCam.SetActive(false);
@@ -724,7 +760,7 @@ public class RoomManager : MonoBehaviourPunCallbacks
     }
 
     // =============================================
-    // GAME END
+    // END GAME
     // =============================================
     void EndGame()
     {
@@ -741,77 +777,256 @@ public class RoomManager : MonoBehaviourPunCallbacks
 
         if (FirebaseManager.instance != null)
         {
-            FirebaseManager.instance.matchesPlayed++;
-            int newTotalKills = FirebaseManager.instance.myKills + kills;
-            int newTotalDeaths = FirebaseManager.instance.myDeaths + deaths;
-            int earnedCoins = kills * 2;
-            int newTotalCoins = FirebaseManager.instance.myCoins + earnedCoins;
+            var fm = FirebaseManager.instance;
 
-            FirebaseManager.instance.SaveData(
-                FirebaseManager.instance.myName,
-                newTotalKills, newTotalDeaths, newTotalCoins,
-                FirebaseManager.instance.headIndex,
-                FirebaseManager.instance.helmetIndex,
-                FirebaseManager.instance.vestIndex,
-                FirebaseManager.instance.headsOwned,
-                FirebaseManager.instance.helmetsOwned,
-                FirebaseManager.instance.vestsOwned,
-                FirebaseManager.instance.primaryGunID,
-                FirebaseManager.instance.secondaryGunID,
-                FirebaseManager.instance.gunsOwned
+            // Get match kills
+            int propsKills = 0;
+            int propsDeaths = 0;
+
+            if (PhotonNetwork.LocalPlayer.CustomProperties.ContainsKey("kills"))
+                propsKills = (int)PhotonNetwork.LocalPlayer.CustomProperties["kills"];
+            if (PhotonNetwork.LocalPlayer.CustomProperties.ContainsKey("deaths"))
+                propsDeaths = (int)PhotonNetwork.LocalPlayer.CustomProperties["deaths"];
+
+            int myMatchKills = Mathf.Max(propsKills, kills);
+            int myMatchDeaths = Mathf.Max(propsDeaths, deaths);
+
+            Debug.Log("Match kills: " + myMatchKills +
+                      " | Match deaths: " + myMatchDeaths);
+
+            fm.matchesPlayed++;
+
+            // =============================================
+            // WINNER CHECK — beats ALL players AND bots
+            // =============================================
+            bool isWinner = false;
+
+            if (myMatchKills > 0)
+            {
+                bool anyoneHasMoreKills = false;
+
+                // Check bots
+                BotController[] bots = FindObjectsOfType<BotController>();
+                foreach (var bot in bots)
+                {
+                    if (bot.kills > myMatchKills)
+                    {
+                        anyoneHasMoreKills = true;
+                        Debug.Log("Lost to bot: " + bot.botName +
+                                  " with " + bot.kills + " kills");
+                        break;
+                    }
+                }
+
+                // Check real players
+                if (!anyoneHasMoreKills)
+                {
+                    foreach (var p in PhotonNetwork.PlayerList)
+                    {
+                        if (p.IsLocal) continue;
+                        int pKills = p.CustomProperties.ContainsKey("kills") ?
+                                     (int)p.CustomProperties["kills"] : 0;
+                        if (pKills > myMatchKills)
+                        {
+                            anyoneHasMoreKills = true;
+                            Debug.Log("Lost to player: " + p.NickName +
+                                      " with " + pKills + " kills");
+                            break;
+                        }
+                    }
+                }
+
+                isWinner = !anyoneHasMoreKills;
+            }
+
+            Debug.Log("isWinner: " + isWinner);
+            if (isWinner) fm.wins++;
+
+            // Update stats
+            fm.myKills += myMatchKills;
+            fm.myDeaths += myMatchDeaths;
+
+            // =============================================
+            // COINS — 2 per kill + 100 winner bonus
+            // =============================================
+            int killCoins = myMatchKills * 2;
+            int winnerBonus = isWinner ? 100 : 0;
+            int earnedCoins = killCoins + winnerBonus;
+
+            fm.myCoins += earnedCoins;
+
+            Debug.Log("Kill coins: " + killCoins +
+                      " | Winner bonus: " + winnerBonus +
+                      " | Earned: " + earnedCoins +
+                      " | Total: " + fm.myCoins);
+
+            // Check achievements
+            if (AchievementManager.instance != null)
+            {
+                AchievementManager.instance.CheckAchievements(
+                    myMatchKills,
+                    myMatchDeaths,
+                    matchLengthInSeconds,
+                    isWinner
+                );
+            }
+
+            // Save
+            fm.SaveData(
+                fm.myName,
+                fm.myKills,
+                fm.myDeaths,
+                fm.myCoins,
+                fm.headIndex,
+                fm.helmetIndex,
+                fm.vestIndex,
+                fm.headsOwned,
+                fm.helmetsOwned,
+                fm.vestsOwned,
+                fm.primaryGunID,
+                fm.secondaryGunID,
+                fm.gunsOwned
             );
+
+            Debug.Log("Final saved coins: " + fm.myCoins);
         }
 
         ShowGameOverUI();
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
     }
-
     void ShowGameOverUI()
     {
         if (gameOverPanel != null) gameOverPanel.SetActive(true);
         if (roomCam != null) roomCam.SetActive(true);
         if (playerObject != null) playerObject.SetActive(false);
 
-        var sortedPlayers = PhotonNetwork.PlayerList.OrderByDescending(p =>
-            p.CustomProperties.ContainsKey("kills") ?
-            (int)p.CustomProperties["kills"] : 0
-        ).ToList();
+        // =============================================
+        // BUILD COMBINED LIST — humans + bots
+        // =============================================
+        List<GameOverPlayerData> allPlayers = new List<GameOverPlayerData>();
 
-        if (top3Container != null)
-            foreach (Transform child in top3Container)
-                Destroy(child.gameObject);
-
-        int count = 0;
-        foreach (var p in sortedPlayers)
+        // Add real players
+        foreach (var p in PhotonNetwork.PlayerList)
         {
-            if (count >= 3) break;
-
             int pKills = p.CustomProperties.ContainsKey("kills") ?
                          (int)p.CustomProperties["kills"] : 0;
             int pDeaths = p.CustomProperties.ContainsKey("deaths") ?
                           (int)p.CustomProperties["deaths"] : 0;
 
-            if (playerRowPrefab != null && top3Container != null)
+            allPlayers.Add(new GameOverPlayerData
             {
-                GameObject row = Instantiate(playerRowPrefab, top3Container);
-                PlayerListItem item = row.GetComponent<PlayerListItem>();
-                if (item != null) item.Setup(p.NickName, pKills, pDeaths, count + 1);
-            }
-
-            if (count == 0 && winnerText != null)
-                winnerText.text = "WINNER\n" + p.NickName;
-
-            count++;
+                name = string.IsNullOrEmpty(p.NickName) ? "Player" : p.NickName,
+                kills = pKills,
+                deaths = pDeaths,
+                isLocal = p.IsLocal,
+                isBot = false
+            });
         }
 
+        // Add bots
+        BotController[] bots = FindObjectsOfType<BotController>();
+        foreach (var bot in bots)
+        {
+            allPlayers.Add(new GameOverPlayerData
+            {
+                name = bot.botName,
+                kills = bot.kills,
+                deaths = bot.deaths,
+                isLocal = false,
+                isBot = true
+            });
+        }
+
+        // =============================================
+        // SORT — most kills first, least deaths as tiebreaker
+        // =============================================
+        allPlayers.Sort((a, b) =>
+        {
+            if (b.kills != a.kills)
+                return b.kills.CompareTo(a.kills); // Higher kills first
+            return a.deaths.CompareTo(b.deaths);   // Lower deaths as tiebreaker
+        });
+
+        Debug.Log("Game Over — Total players ranked: " + allPlayers.Count);
+        for (int i = 0; i < allPlayers.Count; i++)
+            Debug.Log("#" + (i + 1) + " " + allPlayers[i].name +
+                      " K:" + allPlayers[i].kills +
+                      " D:" + allPlayers[i].deaths);
+
+        // =============================================
+        // WINNER TEXT — #1 player
+        // =============================================
+        if (allPlayers.Count > 0)
+        {
+            var winner = allPlayers[0];
+            if (winnerText != null)
+            {
+                if (winner.isLocal)
+                    winnerText.text = "WINNER\n" + winner.name + "\n🏆 YOU WIN!";
+                else
+                    winnerText.text = "WINNER\n" + winner.name;
+            }
+        }
+
+        // =============================================
+        // TOP 3 LIST
+        // =============================================
+        if (top3Container != null)
+            foreach (Transform child in top3Container)
+                Destroy(child.gameObject);
+
+        int count = Mathf.Min(3, allPlayers.Count);
+        for (int i = 0; i < count; i++)
+        {
+            if (playerRowPrefab == null || top3Container == null) break;
+
+            GameObject row = Instantiate(playerRowPrefab, top3Container);
+            PlayerListItem item = row.GetComponent<PlayerListItem>();
+            if (item != null)
+                item.Setup(allPlayers[i].name, allPlayers[i].kills,
+                           allPlayers[i].deaths, i + 1);
+        }
+
+        // =============================================
+        // MY STATS — find local player rank
+        // =============================================
         if (myStatsText != null)
         {
-            int myRank = sortedPlayers.IndexOf(PhotonNetwork.LocalPlayer) + 1;
-            int myKills = PhotonNetwork.LocalPlayer.CustomProperties.ContainsKey("kills")
-                ? (int)PhotonNetwork.LocalPlayer.CustomProperties["kills"] : 0;
-            myStatsText.text = "RANK: #" + myRank + " | KILLS: " + myKills;
+            int myRank = -1;
+            int myKills = 0;
+            int myDeaths = 0;
+
+            for (int i = 0; i < allPlayers.Count; i++)
+            {
+                if (allPlayers[i].isLocal)
+                {
+                    myRank = i + 1;
+                    myKills = allPlayers[i].kills;
+                    myDeaths = allPlayers[i].deaths;
+                    break;
+                }
+            }
+
+            if (myRank > 0)
+                myStatsText.text = "YOUR RANK: #" + myRank +
+                                   " | KILLS: " + myKills +
+                                   " | DEATHS: " + myDeaths;
+            else
+                myStatsText.text = "No stats found";
         }
+    }
+
+    // =============================================
+    // HELPER CLASS for game over ranking
+    // =============================================
+    private class GameOverPlayerData
+    {
+        public string name;
+        public int kills;
+        public int deaths;
+        public bool isLocal;
+        public bool isBot;
     }
 
     // =============================================
@@ -829,13 +1044,36 @@ public class RoomManager : MonoBehaviourPunCallbacks
 
     public void LeaveMatch()
     {
-        PhotonNetwork.LeaveRoom();
+        Debug.Log("LeaveMatch called. InRoom: " + PhotonNetwork.InRoom);
+
+        if (PhotonNetwork.InRoom)
+        {
+            PhotonNetwork.LeaveRoom();
+        }
+        else
+        {
+            // Already on master server — go to lobby directly
+            SceneManager.LoadScene("3_Lobby");
+        }
     }
 
     public override void OnLeftRoom()
     {
         base.OnLeftRoom();
-        SceneManager.LoadScene("3_Lobby");
+        Debug.Log("Left room. gameIsLive: " + gameIsLive);
+
+        if (gameIsLive)
+        {
+            // Game was active — go back to lobby scene
+            gameIsLive = false;
+            SceneManager.LoadScene("3_Lobby");
+        }
+        else
+        {
+            // Game hadn't started — cancelled custom room or left lobby
+            // Stay on same scene and reset UI
+            ResetToLobbyUI();
+        }
     }
 
     public void MapSpawnPlayer()

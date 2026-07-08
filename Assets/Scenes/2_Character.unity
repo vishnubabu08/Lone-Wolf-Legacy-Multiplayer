@@ -282,7 +282,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 7834758006639453087, guid: 12a56ee4630040c4eb17ae9707ed4cef, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1577290415}
   m_SourcePrefab: {fileID: 100100000, guid: 12a56ee4630040c4eb17ae9707ed4cef, type: 3}
 --- !u!1 &66603877
 GameObject:
@@ -431,6 +434,7 @@ MonoBehaviour:
   m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
+  m_characterHorizontalScale: 1
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
@@ -802,6 +806,7 @@ MonoBehaviour:
   m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 5
+  m_characterHorizontalScale: 1
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
@@ -939,6 +944,7 @@ MonoBehaviour:
   m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 2
+  m_characterHorizontalScale: 1
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
@@ -1128,6 +1134,38 @@ PrefabInstance:
       propertyPath: m_Enabled
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6615970811822198102, guid: 8541fa8839121ca4886fafa4661ce0cd, type: 3}
+      propertyPath: 'vests.Array.data[0]'
+      value: 
+      objectReference: {fileID: 216554242}
+    - target: {fileID: 6615970811822198102, guid: 8541fa8839121ca4886fafa4661ce0cd, type: 3}
+      propertyPath: 'vests.Array.data[1]'
+      value: 
+      objectReference: {fileID: 1245877190}
+    - target: {fileID: 6615970811822198102, guid: 8541fa8839121ca4886fafa4661ce0cd, type: 3}
+      propertyPath: 'vests.Array.data[2]'
+      value: 
+      objectReference: {fileID: 2065588091}
+    - target: {fileID: 6615970811822198102, guid: 8541fa8839121ca4886fafa4661ce0cd, type: 3}
+      propertyPath: 'vests.Array.data[3]'
+      value: 
+      objectReference: {fileID: 753980098}
+    - target: {fileID: 6615970811822198102, guid: 8541fa8839121ca4886fafa4661ce0cd, type: 3}
+      propertyPath: 'vests.Array.data[4]'
+      value: 
+      objectReference: {fileID: 2030550968}
+    - target: {fileID: 6615970811822198102, guid: 8541fa8839121ca4886fafa4661ce0cd, type: 3}
+      propertyPath: 'vests.Array.data[5]'
+      value: 
+      objectReference: {fileID: 1612332768}
+    - target: {fileID: 6615970811822198102, guid: 8541fa8839121ca4886fafa4661ce0cd, type: 3}
+      propertyPath: 'vests.Array.data[6]'
+      value: 
+      objectReference: {fileID: 393200321}
+    - target: {fileID: 6615970811822198102, guid: 8541fa8839121ca4886fafa4661ce0cd, type: 3}
+      propertyPath: 'vests.Array.data[7]'
+      value: 
+      objectReference: {fileID: 1101172762}
     - target: {fileID: 7216206814933372778, guid: 8541fa8839121ca4886fafa4661ce0cd, type: 3}
       propertyPath: m_IsActive
       value: 0
@@ -1273,6 +1311,7 @@ MonoBehaviour:
   m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
+  m_characterHorizontalScale: 1
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
@@ -1409,6 +1448,7 @@ MonoBehaviour:
   m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 2
+  m_characterHorizontalScale: 1
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
@@ -1686,135 +1726,159 @@ MonoBehaviour:
   headPreviewImage: {fileID: 118511541}
   heads:
   - itemName: MARCUS BLACKWOLF
-    price: 100
+    price: 10000
     model: {fileID: 146329374}
     itemSprite: {fileID: 21300000, guid: 02dfe69f7abe5d249b263a8967cb6b23, type: 3}
     isOwned: 0
+    armorHP: 50
   - itemName: KANE
-    price: 500
+    price: 50000
     model: {fileID: 222630140}
     itemSprite: {fileID: 21300000, guid: aca0a2c85e758f347a36b4cec1c6d24a, type: 3}
     isOwned: 0
+    armorHP: 50
   - itemName: RAGNER STEELE
-    price: 500
+    price: 60000
     model: {fileID: 1627902409}
     itemSprite: {fileID: 21300000, guid: bac58defb90edfd4780fdf4b99131b24, type: 3}
     isOwned: 0
+    armorHP: 50
   - itemName: AXEL VORTEX
-    price: 500
+    price: 7000
     model: {fileID: 395984444}
     itemSprite: {fileID: 21300000, guid: 2b3b6270929024d44992ac632e24e612, type: 3}
     isOwned: 0
+    armorHP: 50
   - itemName: BLASKOVICH
-    price: 500
+    price: 50000
     model: {fileID: 1389498593}
     itemSprite: {fileID: 21300000, guid: 843674966324bc649917915a71e45752, type: 3}
     isOwned: 0
+    armorHP: 50
   - itemName: DRAKE HAVOC
-    price: 500
+    price: 50000
     model: {fileID: 1548604479}
     itemSprite: {fileID: 21300000, guid: 71da4e0946f130d40acce062adbfa2e9, type: 3}
     isOwned: 0
+    armorHP: 50
   - itemName: LEONID
-    price: 500
+    price: 60000
     model: {fileID: 541538214}
     itemSprite: {fileID: 21300000, guid: 66ead48ad2db4fc43bed906fbde642db, type: 3}
     isOwned: 0
+    armorHP: 50
   - itemName: REX
-    price: 500
+    price: 70000
     model: {fileID: 1571589064}
     itemSprite: {fileID: 21300000, guid: 41e40e16aabe3b549a0787e0349db104, type: 3}
     isOwned: 0
+    armorHP: 50
   - itemName: ORION
-    price: 500
+    price: 50000
     model: {fileID: 2091816743}
     itemSprite: {fileID: 21300000, guid: c96e6a8e5cb835648b5a2a1e28aafccc, type: 3}
     isOwned: 0
+    armorHP: 50
   helmetNameText: {fileID: 1543977812}
   helmetBuyButton: {fileID: 1449146780}
   helmetBuyButtonText: {fileID: 2013088565}
   helmetPreviewImage: {fileID: 1647866008}
   helmets:
-  - itemName: 'PHANTOM OPS '
-    price: 200
-    model: {fileID: 1671238457}
-    itemSprite: {fileID: 21300000, guid: 305422f371575984b97d76f9c8f762fb, type: 3}
-    isOwned: 0
-  - itemName: VANGUARD MK
-    price: 200
-    model: {fileID: 1911312986}
-    itemSprite: {fileID: 21300000, guid: e5af3a97991da3441abc467820a82b94, type: 3}
-    isOwned: 0
-  - itemName: IRONCLAD TACTICAL
-    price: 200
-    model: {fileID: 933219926}
-    itemSprite: {fileID: 21300000, guid: 61dadb99361a7c544ab54958a253bf92, type: 3}
-    isOwned: 0
-  - itemName: NIGHTWATCH RECON
-    price: 200
-    model: {fileID: 912976156}
-    itemSprite: {fileID: 21300000, guid: 3bcf4772a9544834da42d93b6313c523, type: 3}
-    isOwned: 0
-  - itemName: SHADOWCORE BATTLE
-    price: 200
-    model: {fileID: 455577470}
-    itemSprite: {fileID: 21300000, guid: 8aa5d99a4a715bb4abc7750a011404f4, type: 3}
-    isOwned: 0
-  - itemName: TITAN GUARD
-    price: 200
-    model: {fileID: 229962851}
-    itemSprite: {fileID: 21300000, guid: fd4d5b4908cc3bb40a686357b7a6a1db, type: 3}
-    isOwned: 0
   - itemName: NON
     price: 0
     model: {fileID: 216554243}
     itemSprite: {fileID: 21300000, guid: eb23e1a92c5a23c4f9edca6c9cb139cd, type: 3}
     isOwned: 1
+    armorHP: 0
+  - itemName: 'PHANTOM OPS '
+    price: 20000
+    model: {fileID: 1671238457}
+    itemSprite: {fileID: 21300000, guid: 305422f371575984b97d76f9c8f762fb, type: 3}
+    isOwned: 0
+    armorHP: 80
+  - itemName: VANGUARD MK
+    price: 30000
+    model: {fileID: 1911312986}
+    itemSprite: {fileID: 21300000, guid: e5af3a97991da3441abc467820a82b94, type: 3}
+    isOwned: 0
+    armorHP: 50
+  - itemName: IRONCLAD TACTICAL
+    price: 50000
+    model: {fileID: 933219926}
+    itemSprite: {fileID: 21300000, guid: 61dadb99361a7c544ab54958a253bf92, type: 3}
+    isOwned: 0
+    armorHP: 70
+  - itemName: NIGHTWATCH RECON
+    price: 40000
+    model: {fileID: 912976156}
+    itemSprite: {fileID: 21300000, guid: 3bcf4772a9544834da42d93b6313c523, type: 3}
+    isOwned: 0
+    armorHP: 60
+  - itemName: SHADOWCORE BATTLE
+    price: 70000
+    model: {fileID: 455577470}
+    itemSprite: {fileID: 21300000, guid: 8aa5d99a4a715bb4abc7750a011404f4, type: 3}
+    isOwned: 0
+    armorHP: 100
+  - itemName: TITAN GUARD
+    price: 10000
+    model: {fileID: 229962851}
+    itemSprite: {fileID: 21300000, guid: fd4d5b4908cc3bb40a686357b7a6a1db, type: 3}
+    isOwned: 0
+    armorHP: 30
   vestNameText: {fileID: 2111427524}
   vestBuyButton: {fileID: 1767320364}
   vestBuyButtonText: {fileID: 1063620211}
   vestPreviewImage: {fileID: 1217646323}
   vests:
-  - itemName: AEIGS ARMOR
-    price: 200
-    model: {fileID: 1245877190}
-    itemSprite: {fileID: 21300000, guid: b701a0dfca141d9408b2e8ab61eb4043, type: 3}
-    isOwned: 1
-  - itemName: IRONSHIELD TACTICAL
-    price: 100
-    model: {fileID: 2065588091}
-    itemSprite: {fileID: 21300000, guid: a034ce8e372e3d0429c97273f0fd2755, type: 3}
-    isOwned: 0
-  - itemName: SENTINAL BALLISTIC
-    price: 200
-    model: {fileID: 753980098}
-    itemSprite: {fileID: 21300000, guid: 6ac0ed6aa2c9ce347a644f4a10bbb1cc, type: 3}
-    isOwned: 0
-  - itemName: 'BULWARK '
-    price: 200
-    model: {fileID: 2030550968}
-    itemSprite: {fileID: 21300000, guid: 3ca49726cf02d3e42a581381650000be, type: 3}
-    isOwned: 0
-  - itemName: RAPTORECORE
-    price: 299
-    model: {fileID: 1612332768}
-    itemSprite: {fileID: 21300000, guid: f99d787e7b64f58428f17e74865ae264, type: 3}
-    isOwned: 0
-  - itemName: 'WARFORGE '
-    price: 300
-    model: {fileID: 393200321}
-    itemSprite: {fileID: 21300000, guid: dd127615236225044a7297acc9dbafb0, type: 3}
-    isOwned: 0
-  - itemName: NIGHTHAWK
-    price: 300
-    model: {fileID: 1101172762}
-    itemSprite: {fileID: 21300000, guid: 88ca989ac089d584e9412d5a42e82d1a, type: 3}
-    isOwned: 0
   - itemName: NON
     price: 0
     model: {fileID: 216554242}
     itemSprite: {fileID: 21300000, guid: eb23e1a92c5a23c4f9edca6c9cb139cd, type: 3}
     isOwned: 1
+    armorHP: 0
+  - itemName: AEIGS ARMOR
+    price: 20000
+    model: {fileID: 1245877190}
+    itemSprite: {fileID: 21300000, guid: b701a0dfca141d9408b2e8ab61eb4043, type: 3}
+    isOwned: 1
+    armorHP: 50
+  - itemName: IRONSHIELD TACTICAL
+    price: 30000
+    model: {fileID: 2065588091}
+    itemSprite: {fileID: 21300000, guid: a034ce8e372e3d0429c97273f0fd2755, type: 3}
+    isOwned: 0
+    armorHP: 60
+  - itemName: SENTINAL BALLISTIC
+    price: 40000
+    model: {fileID: 753980098}
+    itemSprite: {fileID: 21300000, guid: 6ac0ed6aa2c9ce347a644f4a10bbb1cc, type: 3}
+    isOwned: 0
+    armorHP: 70
+  - itemName: 'BULWARK '
+    price: 45000
+    model: {fileID: 2030550968}
+    itemSprite: {fileID: 21300000, guid: 3ca49726cf02d3e42a581381650000be, type: 3}
+    isOwned: 0
+    armorHP: 75
+  - itemName: RAPTORECORE
+    price: 30000
+    model: {fileID: 1612332768}
+    itemSprite: {fileID: 21300000, guid: f99d787e7b64f58428f17e74865ae264, type: 3}
+    isOwned: 0
+    armorHP: 50
+  - itemName: 'WARFORGE '
+    price: 35000
+    model: {fileID: 393200321}
+    itemSprite: {fileID: 21300000, guid: dd127615236225044a7297acc9dbafb0, type: 3}
+    isOwned: 0
+    armorHP: 60
+  - itemName: NIGHTHAWK
+    price: 45000
+    model: {fileID: 1101172762}
+    itemSprite: {fileID: 21300000, guid: 88ca989ac089d584e9412d5a42e82d1a, type: 3}
+    isOwned: 0
+    armorHP: 80
 --- !u!114 &374434719
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1839,30 +1903,35 @@ MonoBehaviour:
   slot2Text: {fileID: 296179074}
   allGuns:
   - itemName: SCARAL
-    price: 200
+    price: 65000
     model: {fileID: 163181385}
     itemSprite: {fileID: 21300000, guid: c61f5c4be70170d46a8cda6c5a726ffb, type: 3}
     isOwned: 1
+    armorHP: 50
   - itemName: SCARAL FIRE RED
-    price: 200
+    price: 70000
     model: {fileID: 242939266}
     itemSprite: {fileID: 21300000, guid: 94df51172536ebe4b9aa53831b721092, type: 3}
     isOwned: 1
+    armorHP: 50
   - itemName: Ak47
-    price: 200
+    price: 55000
     model: {fileID: 1428172266}
     itemSprite: {fileID: 21300000, guid: eadc1f89eea58ed47b52d264da70a5c8, type: 3}
     isOwned: 0
+    armorHP: 50
   - itemName: AR-15
-    price: 200
+    price: 80000
     model: {fileID: 2096423428}
     itemSprite: {fileID: 1683451010, guid: 917637ed7a416d047b339f2907533e73, type: 3}
     isOwned: 0
+    armorHP: 50
   - itemName: AWM
-    price: 200
+    price: 100000
     model: {fileID: 1015255986}
     itemSprite: {fileID: 21300000, guid: 4caa2959342259c4b9b474c8ddba1a56, type: 3}
     isOwned: 0
+    armorHP: 50
   gunModelsInHand:
   - {fileID: 163181385}
   - {fileID: 242939266}
@@ -1974,6 +2043,7 @@ MonoBehaviour:
   m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 2
+  m_characterHorizontalScale: 1
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
@@ -2305,17 +2375,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Version: 3
   m_UsePipelineSettings: 1
   m_AdditionalLightsShadowResolutionTier: 2
-  m_LightLayerMask: 1
-  m_RenderingLayers: 1
   m_CustomShadowLayers: 0
-  m_ShadowLayerMask: 1
-  m_ShadowRenderingLayers: 1
   m_LightCookieSize: {x: 1, y: 1}
   m_LightCookieOffset: {x: 0, y: 0}
   m_SoftShadowQuality: 0
+  m_RenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_ShadowRenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_Version: 4
+  m_LightLayerMask: 1
+  m_ShadowLayerMask: 1
+  m_RenderingLayers: 1
+  m_ShadowRenderingLayers: 1
 --- !u!108 &468674216
 Light:
   m_ObjectHideFlags: 0
@@ -2324,14 +2400,14 @@ Light:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 468674213}
   m_Enabled: 1
-  serializedVersion: 11
+  serializedVersion: 12
   m_Type: 0
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Intensity: 29.27
   m_Range: 5.03
   m_SpotAngle: 59.61226
   m_InnerSpotAngle: 36.41434
-  m_CookieSize: 10
+  m_CookieSize2D: {x: 10, y: 10}
   m_Shadows:
     m_Type: 1
     m_Resolution: -1
@@ -2793,6 +2869,7 @@ MonoBehaviour:
   m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 2
+  m_characterHorizontalScale: 1
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
@@ -3453,6 +3530,7 @@ MonoBehaviour:
   m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
+  m_characterHorizontalScale: 1
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
@@ -3659,6 +3737,8 @@ MeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -3680,9 +3760,11 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!114 &964537636
 MonoBehaviour:
@@ -3882,6 +3964,7 @@ MonoBehaviour:
   m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 5
+  m_characterHorizontalScale: 1
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
@@ -4018,6 +4101,7 @@ MonoBehaviour:
   m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
+  m_characterHorizontalScale: 1
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
@@ -4567,6 +4651,7 @@ MonoBehaviour:
   m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 5
+  m_characterHorizontalScale: 1
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
@@ -5197,6 +5282,8 @@ MeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -5218,9 +5305,11 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!114 &1449146782
 MonoBehaviour:
@@ -5370,6 +5459,7 @@ MonoBehaviour:
   m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
+  m_characterHorizontalScale: 1
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
@@ -5570,14 +5660,14 @@ Light:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1492834029}
   m_Enabled: 1
-  serializedVersion: 11
+  serializedVersion: 12
   m_Type: 1
   m_Color: {r: 1, g: 0.95686275, b: 0.8392157, a: 1}
   m_Intensity: 0.05
   m_Range: 10
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
-  m_CookieSize: 10
+  m_CookieSize2D: {x: 10, y: 10}
   m_Shadows:
     m_Type: 2
     m_Resolution: -1
@@ -5654,17 +5744,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Version: 3
   m_UsePipelineSettings: 1
   m_AdditionalLightsShadowResolutionTier: 2
-  m_LightLayerMask: 1
-  m_RenderingLayers: 1
   m_CustomShadowLayers: 0
-  m_ShadowLayerMask: 1
-  m_ShadowRenderingLayers: 1
   m_LightCookieSize: {x: 1, y: 1}
   m_LightCookieOffset: {x: 0, y: 0}
   m_SoftShadowQuality: 0
+  m_RenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_ShadowRenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_Version: 4
+  m_LightLayerMask: 1
+  m_ShadowLayerMask: 1
+  m_RenderingLayers: 1
+  m_ShadowRenderingLayers: 1
 --- !u!1 &1543331367
 GameObject:
   m_ObjectHideFlags: 0
@@ -5832,6 +5928,7 @@ MonoBehaviour:
   m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
+  m_characterHorizontalScale: 1
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
@@ -5958,6 +6055,40 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 7903006368908631079, guid: 8541fa8839121ca4886fafa4661ce0cd, type: 3}
   m_PrefabInstance: {fileID: 216554241}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1577290413 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7834758006639453087, guid: 12a56ee4630040c4eb17ae9707ed4cef, type: 3}
+  m_PrefabInstance: {fileID: 61509643}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1577290415
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1577290413}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.UniversalAdditionalLightData
+  m_UsePipelineSettings: 1
+  m_AdditionalLightsShadowResolutionTier: 2
+  m_CustomShadowLayers: 0
+  m_LightCookieSize: {x: 1, y: 1}
+  m_LightCookieOffset: {x: 0, y: 0}
+  m_SoftShadowQuality: 0
+  m_RenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_ShadowRenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_Version: 4
+  m_LightLayerMask: 1
+  m_ShadowLayerMask: 1
+  m_RenderingLayers: 1
+  m_ShadowRenderingLayers: 1
 --- !u!1 &1594028201
 GameObject:
   m_ObjectHideFlags: 0
@@ -6771,6 +6902,8 @@ MeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -6792,9 +6925,11 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!114 &1767320366
 MonoBehaviour:
@@ -7078,6 +7213,8 @@ MeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -7099,9 +7236,11 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &1912612661
 MeshFilter:
@@ -7605,6 +7744,7 @@ MonoBehaviour:
   m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
+  m_characterHorizontalScale: 1
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
@@ -7990,6 +8130,7 @@ MonoBehaviour:
   m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 2
+  m_characterHorizontalScale: 1
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
@@ -8136,6 +8277,7 @@ MonoBehaviour:
   m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
+  m_characterHorizontalScale: 1
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
@@ -8294,6 +8436,8 @@ MeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -8315,9 +8459,11 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!114 &2120250130
 MonoBehaviour:
@@ -8502,7 +8648,6 @@ MonoBehaviour:
   m_ScreenCoordScaleBias: {x: 0, y: 0, z: 0, w: 0}
   m_RequiresDepthTexture: 0
   m_RequiresColorTexture: 0
-  m_Version: 2
   m_TaaSettings:
     m_Quality: 3
     m_FrameInfluence: 0.1
@@ -8510,6 +8655,7 @@ MonoBehaviour:
     m_MipBias: 0
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
+  m_Version: 2
 --- !u!95 &2133105718
 Animator:
   serializedVersion: 7
@@ -8560,6 +8706,8 @@ MeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -8581,9 +8729,11 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &100880784088939592
 MeshFilter:
@@ -8613,6 +8763,8 @@ MeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -8634,9 +8786,11 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!23 &186158615217145217
 MeshRenderer:
@@ -8658,6 +8812,8 @@ MeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -8679,9 +8835,11 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!4 &187846531449475727
 Transform:
@@ -8718,6 +8876,8 @@ MeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -8739,9 +8899,11 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &344875275623790554
 MeshFilter:
@@ -8771,6 +8933,8 @@ MeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -8792,9 +8956,11 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!1 &471863496689734817
 GameObject:
@@ -8918,6 +9084,8 @@ MeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -8939,9 +9107,11 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!1 &919132149136043748
 GameObject:
@@ -9165,6 +9335,8 @@ MeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -9186,9 +9358,11 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!108 &2501286151452471327
 Light:
@@ -9198,14 +9372,14 @@ Light:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 522754683722222920}
   m_Enabled: 1
-  serializedVersion: 11
+  serializedVersion: 12
   m_Type: 2
   m_Color: {r: 0.83396226, g: 0.8183982, b: 0.7788893, a: 1}
   m_Intensity: 9.89
   m_Range: 9.05
   m_SpotAngle: 45
   m_InnerSpotAngle: 21.80208
-  m_CookieSize: 10
+  m_CookieSize2D: {x: 10, y: 10}
   m_Shadows:
     m_Type: 1
     m_Resolution: -1
@@ -9283,6 +9457,8 @@ MeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -9304,9 +9480,11 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!1 &2617111914245002890
 GameObject:
@@ -9346,6 +9524,8 @@ MeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -9367,9 +9547,11 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!4 &2645967253232338661
 Transform:
@@ -9421,6 +9603,8 @@ MeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -9442,9 +9626,11 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!1 &2950167618892393318
 GameObject:
@@ -9518,6 +9704,8 @@ MeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -9539,9 +9727,11 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!23 &3408122972384720845
 MeshRenderer:
@@ -9563,6 +9753,8 @@ MeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -9584,9 +9776,11 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!114 &3437311721985336464
 MonoBehaviour:
@@ -9600,17 +9794,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Version: 3
   m_UsePipelineSettings: 1
   m_AdditionalLightsShadowResolutionTier: 2
-  m_LightLayerMask: 1
-  m_RenderingLayers: 1
   m_CustomShadowLayers: 0
-  m_ShadowLayerMask: 1
-  m_ShadowRenderingLayers: 1
   m_LightCookieSize: {x: 1, y: 1}
   m_LightCookieOffset: {x: 0, y: 0}
   m_SoftShadowQuality: 0
+  m_RenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_ShadowRenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_Version: 4
+  m_LightLayerMask: 1
+  m_ShadowLayerMask: 1
+  m_RenderingLayers: 1
+  m_ShadowRenderingLayers: 1
 --- !u!1 &3474197986563777174
 GameObject:
   m_ObjectHideFlags: 0
@@ -9746,6 +9946,8 @@ MeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -9767,9 +9969,11 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!1 &4169802698794276852
 GameObject:
@@ -9824,6 +10028,8 @@ MeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -9845,9 +10051,11 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!4 &4363053807407505198
 Transform:
@@ -9926,6 +10134,8 @@ MeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -9947,9 +10157,11 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!23 &4882601617215374343
 MeshRenderer:
@@ -9971,6 +10183,8 @@ MeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -9992,9 +10206,11 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!1 &4938000828830873645
 GameObject:
@@ -10101,6 +10317,8 @@ MeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -10122,9 +10340,11 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!4 &5658956773217501066
 Transform:
@@ -10176,6 +10396,8 @@ MeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -10197,9 +10419,11 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &5862853063832793849
 MeshFilter:
@@ -10294,6 +10518,8 @@ MeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -10315,9 +10541,11 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!4 &6165084412385841468
 Transform:
@@ -10405,6 +10633,8 @@ MeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -10426,9 +10656,11 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &6422720096883300335
 MeshFilter:
@@ -10780,6 +11012,8 @@ MeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -10801,9 +11035,11 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!4 &8776096138322760715
 Transform:
@@ -10840,6 +11076,8 @@ MeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -10861,9 +11099,11 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!1 &9008244223372563578
 GameObject:
@@ -10918,6 +11158,8 @@ MeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -10939,9 +11181,11 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
