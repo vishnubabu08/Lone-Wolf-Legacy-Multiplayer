@@ -20,6 +20,7 @@ public class LeaderBoard : MonoBehaviour
 
     public GameObject wholeUI;
     public TextMeshProUGUI localPlayerNameText;
+    
     public TextMeshProUGUI localPlayerKDtext;
 
     // A simple class to hold data for BOTH Humans and Bots
@@ -115,6 +116,7 @@ public class LeaderBoard : MonoBehaviour
             if (player.isLocal)
             {
                 if (localPlayerNameText) localPlayerNameText.text = player.name;
+               
                 if (localPlayerKDtext) localPlayerKDtext.text = $"K/D {player.kills}/{player.deaths}";
             }
 
